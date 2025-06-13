@@ -118,11 +118,7 @@ let rec print_ty info fmt ty = match ty.ty_node with
   | Tyvar v -> empty_elem "tvar" (attrib "name" print_tv) fmt v
   | Tyapp (ts, tl) when is_ts_tuple ts ->
       elems' "prodt" (print_ty info) fmt tl
-  | Tyapp (ts, tl) ->
-      begin match query_syntax info.info_syn ts.ts_name with
-        | Some s -> syntax_arguments s (print_ty info) fmt tl
-        | None -> elems "type" (print_ts_real info) (print_ty info) fmt (ts, tl)
-      end
+  | Tyapp (ts, tl) -> elems "type" (print_ts_real info) (print_ty info) fmt (ts, tl)
 
 let print_fun_type info fmt (tys, opty) = match opty with
   | None -> elems' "pred" (print_ty info) fmt tys
@@ -149,6 +145,10 @@ let print_app pr pr' fmt ((h, xs) as p) = match xs with
 let print_var info fmt v =
   elem "var" (attrib "name" print_vs) (print_ty info) fmt (v, v.vs_ty)
 
+let print_as fmt printer name v =
+  elem "as" (attrib "name" print_vs) printer fmt (name, v)
+
+
 let print_const = empty_elem "const" (attrib "name" string)
 
 let print_abs info pr fmt (v, t) =
@@ -161,7 +161,7 @@ let p_type p = p.pat_ty
 let rec split_por p = match p.pat_node with
   | Pwild -> [pat_wild p.pat_ty]
   | Pvar v -> [pat_var v]
-  | Pas _ -> assert false
+  | Pas (p, v) -> [pat_as p v]
   | Por (p1, p2) -> split_por p1 @ split_por p2
   | Papp (cs, pl) ->
       List.map (fun zs -> pat_app cs zs p.pat_ty)
@@ -173,27 +173,14 @@ let rec split_por p = match p.pat_node with
 let rec print_pat info fmt p = match p.pat_node with
   | Pwild -> print_const fmt "Pure.dummy_pattern"
   | Pvar v -> print_var info fmt v
-  | Pas _ ->
-      assert false
+  | Pas (p, name) -> print_as fmt (print_pat info) name p
   | Por _ ->
       assert false
   | Papp (cs, pl) when is_fs_tuple cs ->
       elems' "prod" (print_pat info) fmt pl
   | Papp (cs, pl) ->
-      begin match query_syntax info.info_syn cs.ls_name with
-      | Some s ->
-          let pl = Array.of_list pl in
-          let pr fmt _ c i =
-            match c with
-            | None -> print_pat info fmt pl.(i - 1)
-            | Some 't' ->
-                let v = if i = 0 then p else pl.(i - 1) in
-                print_ty info fmt (p_type v)
-            | Some c -> raise (BadSyntaxKind c) in
-          gen_syntax_arguments_prec fmt s pr []
-        | _ -> print_app (print_ls_real info Sls.empty) (print_pat info)
+      print_app (print_ls_real info Sls.empty) (print_pat info)
             fmt ((cs, (List.map p_type pl, Some (p.pat_ty))), pl)
-      end
 
 let binop_name = function
   | Tand -> "HOL.conj"
@@ -248,12 +235,8 @@ let rec print_term info defs fmt t = match t.t_node with
   | Tapp (fs, pl) when is_fs_tuple fs ->
       elems' "prod" (print_term info defs) fmt pl
   | Tapp (fs, tl) ->
-      begin match query_syntax info.info_syn fs.ls_name with
-        | Some s -> syntax_arguments_typed s
-            (print_term info defs) (print_ty info) t fmt tl
-        | _ -> print_app (print_ls_real info defs) (print_term info defs)
+      print_app (print_ls_real info defs) (print_term info defs)
             fmt ((fs, (List.map t_type tl, t.t_ty)), tl)
-      end
   | Tquant (q, fq) ->
       let vl, _tl, f = t_open_quant fq in
       print_quant info defs
@@ -275,8 +258,8 @@ and print_quant info defs s fmt (vl, f) = match vl with
 
 and print_branch info defs fmt br =
   let p, t = t_open_branch br in
-  print_list nothing (elem' "pat" (pair (print_pat info) (print_term info defs)))
-    fmt (List.map (fun q -> (q, t)) (split_por p));
+  print_list nothing (elem' "pat" (pair (print_pat info) (pair (print_ty info) (print_term info defs))))
+    fmt (List.map (fun q -> (q, (p.pat_ty, t))) (split_por p));
   Svs.iter forget_var p.pat_vars
 
 let rec dest_conj t = match t.t_node with
@@ -335,8 +318,18 @@ let print_equivalence_lemma info fmt (ls, ld) =
   print_statement "lemma" (attrib "name" string) name info fmt (ls_defn_axiom ld)
 
 let print_fun_eqn s info defs fmt (ls, ld) =
-  let vl, t = dest_forall [] (ls_defn_axiom ld) in
-  elem s (print_altname_path info) (print_term info defs) fmt (ls.ls_name, t);
+  let t0 = ls_defn_axiom ld in
+  let vl, t = dest_forall [] t0 in (
+  match ls.ls_value with
+  | None ->
+      elem s (print_altname_path info)
+             (pair (elem' "body" (print_term info defs))
+                   (elems' "argtys" (print_ty info))) fmt (ls.ls_name, (t, ls.ls_args))
+  | Some ty ->
+      elem s (print_altname_path info)
+             (pair (elem' "body" (print_term info defs))
+             (pair (elems' "argtys" (print_ty info))
+                   (elem' "retty" (print_ty info)))) fmt (ls.ls_name, (t, (ls.ls_args, ty))) ) ;
   List.iter forget_var vl
 
 let print_logic_decl info fmt ((ls, _) as d) =
@@ -441,18 +434,9 @@ let make_thname th = String.concat "." (th.Theory.th_path @
 
 let print_task printer_args realize fmt task =
   forget_ids ();
-  (* find theories that are both used and realized from metas *)
   let realized_theories =
-    Task.on_meta meta_realized_theory (fun mid args ->
-      match args with
-      | [Theory.MAstr s1; Theory.MAstr _] ->
-        let f,id =
-          let l = Strings.rev_split '.' s1 in
-          List.rev (List.tl l), List.hd l in
-        let th = Env.read_theory printer_args.env f id in
-        Mid.add th.Theory.th_name (th, s1) mid
-      | _ -> assert false
-    ) Mid.empty task in
+    let used_th = Task.used_theories task in
+    Mid.map (fun th -> (th, String.concat "." (th.Theory.th_path @ [string_of_id th.Theory.th_name]))) used_th in
   (* two cases: task is use T or task is a real goal *)
   let rec upd_realized_theories = function
     | Some { Task.task_decl = { Theory.td_node =
@@ -462,12 +446,14 @@ let print_task printer_args realize fmt task =
         Sid.iter (fun id -> ignore (id_unique iprinter id)) th.Theory.th_local;
         let id = th.Theory.th_name in
         String.concat "." (th.Theory.th_path @ [string_of_id id]),
-        Mid.remove id realized_theories
+        realized_theories
     | Some { Task.task_decl = { Theory.td_node = Theory.Meta _ };
              Task.task_prev = task } ->
         upd_realized_theories task
     | _ -> assert false in
   let thname, realized_theories = upd_realized_theories task in
+  (* Remove the target theory from realized_theories *)
+  let realized_theories = Mid.filter (fun _ (_, name) -> name <> thname) realized_theories in
   (* make names as stable as possible by first printing all identifiers *)
   let realized_theories' = Mid.map fst realized_theories in
   let realized_symbols = Task.used_symbols realized_theories' in
