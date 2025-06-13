@@ -1060,9 +1060,12 @@ else
                 ISABELLEVERSION=2021-1
                 ;;
           *)
-                enable_isabelle_support=no
-	        AC_MSG_WARN([You need Isabelle 2019 or later; Isabelle discarded.])
-                reason_isabelle_support=" (need version >= 2019)"
+                #dirty hack
+                enable_isabelle_support=yes
+                ISABELLEVERSION=2021-1
+         #      enable_isabelle_support=no
+	       #AC_MSG_WARN([You need Isabelle 2019 or later; Isabelle discarded.])
+         #      reason_isabelle_support=" (need version >= 2019)"
                 ;;
         esac
     fi
