@@ -1,0 +1,16 @@
+plugin "simplify_array.cmo" "simplify_array.cmxs"
+
+printer "why3"
+
+filename "%f-%t-%s.why"
+
+transformations
+        "simplify_array"
+end
+
+theory BuiltIn
+  syntax type   int     "int"
+  syntax type   real    "real"
+  syntax logic  (_=_)   "(%1 = %2)"
+  syntax logic  (_<>_)  "(%1 <> %2)"
+end

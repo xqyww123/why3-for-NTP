@@ -1,0 +1,185 @@
+
+(*
+
+run this test with:
+
+why3 ide -C ../../why3-smt-realize.conf -P cvc4r bv-smtlib-realization.why
+
+*)
+
+theory BV_Check
+
+  use int.Int
+  use bv.BV8
+
+  goal size_pos : size > 0
+
+(* Conversions from/to integers *)
+
+  use bv.Pow2int
+
+  lemma two_power_size_val : two_power_size = pow2 size
+  lemma max_int_val : t'maxInt = two_power_size - 1
+
+  lemma to_uint_extensionality :
+    forall v,v':t. t'int v = t'int v' -> v = v'
+
+  lemma to_int_extensionality:
+    forall v,v':t. to_int v = to_int v' -> v = v'
+
+  lemma to_uint_bounds : forall v:t. 0 <= t'int v < two_power_size
+
+  lemma to_uint_of_int :
+    forall i. 0 <= i < two_power_size -> t'int (of_int i) = i
+
+  lemma Of_int_zero: zeros = of_int 0
+
+  lemma Of_int_ones: ones = of_int t'maxInt
+
+  goal nth_out_of_bound:
+    forall x n. size <= n <= t'maxInt -> nth x n = False
+
+  goal Nth_zero: forall n:int. 0 <= n < size -> nth zeros n = False
+
+  goal Nth_ones:
+    (forall n. ult n size_bv -> nth_bv ones n = True) &&
+    forall n. 0 <= n < size -> ult (of_int n) size_bv && nth ones n = True
+
+  (** Bitwise operators *)
+
+  goal Nth_bw_and:
+    forall v1 v2:t, n:int. 0 <= n < size ->
+      nth (bw_and v1 v2) n = andb (nth v1 n) (nth v2 n)
+
+  goal Nth_bw_or:
+    forall v1 v2:t, n:int. 0 <= n < size ->
+      nth (bw_or v1 v2) n = orb (nth v1 n) (nth v2 n)
+
+  goal Nth_bw_xor:
+    forall v1 v2:t, n:int. 0 <= n < size ->
+      nth (bw_xor v1 v2) n = xorb (nth v1 n) (nth v2 n)
+
+  goal Nth_bw_not:
+    forall v:t, n:int. 0 <= n < size ->
+      nth (bw_not v) n = notb (nth v n)
+
+  goal Lsr_nth_low:
+    forall b:t,n s:int. 0 <= s -> 0 <= n -> n+s < size ->
+      nth (lsr b s) n = nth b (n+s)
+
+  goal Lsr_nth_high:
+    forall b:t,n s:int. 0 <= s -> 0 <= n -> n+s >= size ->
+      nth (lsr b s) n = False
+
+  goal lsr_zero: forall x. lsr x 0 = x
+
+  goal Asr_nth_low:
+    forall b:t,n s:int. 0 <= s -> 0 <= n < size -> n+s < size ->
+      nth (asr b s) n = nth b (n+s)
+
+  goal Asr_nth_high:
+    forall b:t,n s:int. 0 <= s -> 0 <= n < size -> n+s >= size ->
+      nth (asr b s) n = nth b (size-1)
+
+  goal asr_zero: forall x. asr x 0 = x
+
+  goal Lsl_nth_high:
+    forall b:t,n s:int. 0 <= s <= n < size ->
+      nth (lsl b s) n = nth b (n-s)
+
+  goal Lsl_nth_low:
+    forall b:t,n s:int. 0 <= n < s ->
+      nth (lsl b s) n = False
+
+  goal lsl_zero: forall x. lsl x 0 = x
+
+  use int.EuclideanDivision
+
+  goal Nth_rotate_right :
+    forall v n i. 0 <= i < size -> 0 <= n ->
+      nth (rotate_right v n) i = nth v (mod (i + n) size)
+
+  goal Nth_rotate_left :
+    forall v n i. 0 <= i < size -> 0 <= n ->
+      nth (rotate_left v n) i = nth v (mod (i - n) size)
+
+
+  (* comparison operators *)
+
+  goal ult_spec: forall x y. ult x y <-> Int.(<) (t'int x) (t'int y)
+
+  goal ule_spec: forall x y. ule x y <-> Int.(<=) (t'int x) (t'int y)
+
+  goal ugt_spec: forall x y. ugt x y <-> Int.(>) (t'int x) (t'int y)
+
+  goal uge_spec: forall x y. uge x y <-> Int.(>=) (t'int x) (t'int y)
+
+  goal slt_spec: forall x y. slt x y  <-> Int.(<) (to_int x) (to_int y)
+
+  goal sle_spec: forall x y. sle x y <-> Int.(<=) (to_int x) (to_int y)
+
+  goal sgt_spec: forall x y. sgt x y <-> Int.(>) (to_int x) (to_int y)
+
+  goal sge_spec: forall x y. sge x y <-> Int.(>=) (to_int x) (to_int y)
+
+  (** Arithmetic operators *)
+
+  goal to_uint_add:
+    forall v1 v2. t'int (add v1 v2) =  mod (Int.(+) (t'int v1) (t'int v2)) two_power_size
+  goal to_uint_add_bounded:
+    forall v1 v2.
+      t'int v1 + t'int v2 < two_power_size ->
+      t'int (add v1 v2) = t'int v1 + t'int v2
+
+  goal to_uint_sub:
+    forall v1 v2. t'int (sub v1 v2) = mod (Int.(-) (t'int v1) (t'int v2)) two_power_size
+  goal to_uint_sub_bounded:
+    forall v1 v2.
+      0 <= t'int v1 - t'int v2 < two_power_size ->
+      t'int (sub v1 v2) = t'int v1 - t'int v2
+
+  goal to_uint_neg:
+    forall v. t'int (neg v) = mod (Int.(-_) (t'int v)) two_power_size
+
+  goal to_uint_mul:
+    forall v1 v2. t'int (mul v1 v2) = mod (Int.( * ) (t'int v1) (t'int v2)) two_power_size
+  goal to_uint_mul_bounded:
+    forall v1 v2.
+      t'int v1 * t'int v2 < two_power_size ->
+      t'int (mul v1 v2) = t'int v1 * t'int v2
+
+  goal to_uint_udiv:
+    forall v1 v2. t'int (udiv v1 v2) = div (t'int v1) (t'int v2)
+
+  goal to_uint_urem:
+    forall v1 v2. t'int (urem v1 v2) = mod (t'int v1) (t'int v2)
+
+  goal to_uint_lsr:
+    forall v n : t.
+      t'int (lsr_bv v n) = div (t'int v) (pow2 ( t'int n ))
+
+  goal to_uint_lsl:
+    forall v n : t.
+         t'int (lsl_bv v n) = mod (Int.( * ) (t'int v) (pow2 (t'int n))) two_power_size
+
+  (* equality goals *)
+
+  goal eq_sub_equiv: forall a b i n:t.
+      eq_sub    a b (t'int i) (t'int n)
+  <-> eq_sub_bv a b i n
+
+  goal Extensionality: forall x y : t [x == y]. x == y -> x = y
+
+end
+
+theory BVConverter_Check
+
+  use bv.BVConverter_32_64
+
+  goal toSmall_to_uint :
+    forall x. in_range x -> BV64.t'int x = BV32.t'int (toSmall x)
+
+  goal toBig_to_uint :
+    forall x. BV32.t'int x = BV64.t'int (toBig x)
+
+end

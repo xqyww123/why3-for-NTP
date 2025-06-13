@@ -1,0 +1,6 @@
+theory A
+  scope S
+    type t
+    type t
+  end
+end

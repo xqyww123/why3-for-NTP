@@ -1,0 +1,11 @@
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated with uncaught exception `Cannot prove termination for to_map`)
+  - Abstract RAC: INCOMPLETE (terminated with uncaught exception `Cannot prove termination for to_map`)
+- Checked model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated with uncaught exception `Cannot prove termination for to_map`)
+  - Abstract RAC: INCOMPLETE (terminated with uncaught exception `Cannot prove termination for to_map`)
+File "bench/check-ce/model_projection.mlw", line 23, characters 11-48:
+Sub-goal Assertion of goal g1'vc.
+Prover result is: Unknown (sat) (369 steps).
+

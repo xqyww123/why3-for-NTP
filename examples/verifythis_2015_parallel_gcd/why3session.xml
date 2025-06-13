@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"https://www.why3.org/why3session.dtd">
+<why3session shape_version="6">
+<prover id="3" name="CVC5" version="1.1.2" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="6" name="Z3" version="4.13.2" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="7" name="CVC4" version="1.8" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="8" name="Alt-Ergo" version="2.6.0" timelimit="5" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="verifythis_2015_parallel_gcd.mlw"/>
+<theory name="ParallelGCD" proved="true">
+ <goal name="gcd_sub" proved="true">
+ <proof prover="7"><result status="valid" time="2.863885" steps="218332"/></proof>
+ </goal>
+ <goal name="parallel_gcd&#39;vc" expl="VC for parallel_gcd" proved="true">
+ <transf name="split_goal_right" proved="true" >
+  <goal name="parallel_gcd&#39;vc.0" expl="loop invariant init" proved="true">
+  <proof prover="7"><result status="valid" time="0.060186" steps="11304"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.1" expl="loop invariant init" proved="true">
+  <proof prover="3"><result status="valid" time="0.034607" steps="5636"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.2" expl="loop invariant preservation" proved="true">
+  <proof prover="6"><result status="valid" time="0.015677" steps="27757"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.3" expl="loop invariant preservation" proved="true">
+  <proof prover="6"><result status="valid" time="0.015614" steps="37727"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.4" expl="loop invariant preservation" proved="true">
+  <proof prover="3"><result status="valid" time="0.035303" steps="7774"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.5" expl="loop invariant preservation" proved="true">
+  <proof prover="6"><result status="valid" time="0.014201" steps="27669"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.6" expl="loop invariant preservation" proved="true">
+  <proof prover="6"><result status="valid" time="0.012533" steps="27779"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.7" expl="loop invariant preservation" proved="true">
+  <proof prover="7"><result status="valid" time="0.058874" steps="13318"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.8" expl="loop invariant preservation" proved="true">
+  <proof prover="6"><result status="valid" time="0.015808" steps="27544"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.9" expl="loop invariant preservation" proved="true">
+  <proof prover="6"><result status="valid" time="0.015624" steps="27673"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.10" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.018782" steps="32063"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="Interleaving" proved="true">
+ <goal name="gcd_sub" proved="true">
+ <proof prover="7"><result status="valid" time="2.807413" steps="218332"/></proof>
+ </goal>
+ <goal name="step&#39;vc" expl="VC for step" proved="true">
+ <transf name="split_goal_right" proved="true" >
+  <goal name="step&#39;vc.0" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.049545" steps="8999"/></proof>
+  </goal>
+  <goal name="step&#39;vc.1" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.017234" steps="29255"/></proof>
+  </goal>
+  <goal name="step&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.038524" steps="6091"/></proof>
+  </goal>
+  <goal name="step&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.020807" steps="33667"/></proof>
+  </goal>
+  <goal name="step&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.011856" steps="31600"/></proof>
+  </goal>
+  <goal name="step&#39;vc.5" expl="postcondition" proved="true">
+  <proof prover="7"><result status="valid" time="0.053220" steps="10746"/></proof>
+  </goal>
+  <goal name="step&#39;vc.6" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.035363" steps="6084"/></proof>
+  </goal>
+  <goal name="step&#39;vc.7" expl="postcondition" proved="true">
+  <proof prover="7"><result status="valid" time="0.077636" steps="15515"/></proof>
+  </goal>
+  <goal name="step&#39;vc.8" expl="postcondition" proved="true">
+  <proof prover="7"><result status="valid" time="0.070878" steps="13256"/></proof>
+  </goal>
+  <goal name="step&#39;vc.9" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.038321" steps="6047"/></proof>
+  </goal>
+  <goal name="step&#39;vc.10" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.039155" steps="6058"/></proof>
+  </goal>
+  <goal name="step&#39;vc.11" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.020168" steps="32820"/></proof>
+  </goal>
+  <goal name="step&#39;vc.12" expl="postcondition" proved="true">
+  <proof prover="8"><result status="valid" time="0.047904" steps="117"/></proof>
+  </goal>
+  <goal name="step&#39;vc.13" expl="postcondition" proved="true">
+  <proof prover="7"><result status="valid" time="0.074194" steps="13435"/></proof>
+  </goal>
+  <goal name="step&#39;vc.14" expl="postcondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.065294" steps="9287"/></proof>
+  </goal>
+  <goal name="step&#39;vc.15" expl="postcondition" proved="true">
+  <proof prover="8"><result status="valid" time="0.032030" steps="55"/></proof>
+  </goal>
+  <goal name="step&#39;vc.16" expl="postcondition" proved="true">
+  <proof prover="8"><result status="valid" time="0.033431" steps="26"/></proof>
+  </goal>
+  <goal name="step&#39;vc.17" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.022002" steps="29030"/></proof>
+  </goal>
+  <goal name="step&#39;vc.18" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.008077" steps="4115"/></proof>
+  </goal>
+  <goal name="step&#39;vc.19" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.021556" steps="35141"/></proof>
+  </goal>
+  <goal name="step&#39;vc.20" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.003894" steps="3891"/></proof>
+  </goal>
+  <goal name="step&#39;vc.21" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.005051" steps="4229"/></proof>
+  </goal>
+  <goal name="step&#39;vc.22" expl="postcondition" proved="true">
+  <proof prover="8"><result status="valid" time="0.034428" steps="2"/></proof>
+  </goal>
+  <goal name="step&#39;vc.23" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.018365" steps="29368"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="can_progress&#39;vc" expl="VC for can_progress" proved="true">
+ <proof prover="3"><result status="valid" time="0.050670" steps="7719"/></proof>
+ </goal>
+ <goal name="parallel_gcd&#39;vc" expl="VC for parallel_gcd" proved="true">
+ <transf name="split_goal_right" proved="true" >
+  <goal name="parallel_gcd&#39;vc.0" expl="loop invariant init" proved="true">
+  <proof prover="6"><result status="valid" time="0.011961" steps="30207"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.1" expl="precondition" proved="true">
+  <proof prover="8"><result status="valid" time="0.031551" steps="22"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.2" expl="loop variant decrease" proved="true">
+  <transf name="inline_all" proved="true" >
+   <goal name="parallel_gcd&#39;vc.2.0" expl="loop variant decrease" proved="true">
+   <proof prover="3"><result status="valid" time="0.102546" steps="18206"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.3" expl="loop invariant preservation" proved="true">
+  <proof prover="3"><result status="valid" time="0.077950" steps="10600"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.4" expl="precondition" proved="true">
+  <proof prover="3"><result status="valid" time="0.032848" steps="4367"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.5" expl="loop variant decrease" proved="true">
+  <transf name="inline_all" proved="true" >
+   <goal name="parallel_gcd&#39;vc.5.0" expl="loop variant decrease" proved="true">
+   <proof prover="7"><result status="valid" time="0.133862" steps="22637"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.6" expl="loop invariant preservation" proved="true">
+  <proof prover="3"><result status="valid" time="0.081758" steps="10588"/></proof>
+  </goal>
+  <goal name="parallel_gcd&#39;vc.7" expl="postcondition" proved="true">
+  <proof prover="8"><result status="valid" time="0.139002" steps="2698"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

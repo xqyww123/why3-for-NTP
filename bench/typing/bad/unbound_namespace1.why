@@ -1,0 +1,11 @@
+
+(* test file *)
+
+theory A
+  type t
+end
+
+theory B
+  use export A
+  function c : A.t
+end

@@ -1,0 +1,205 @@
+module sqrt.Sqrt1
+
+  prelude
+"#include \"sqrtinit.h\"\
+\n\
+\nuint64_t rsa_estimate (uint64_t a) {\
+\n  uint64_t abits, x0;\
+\n  abits = a >> 55;\
+\n  x0 = 0x100 | invsqrttab[abits - 0x80];\
+\n  return x0;\
+\n}\
+"
+
+syntax val rsa_estimate "rsa_estimate"
+
+end
+
+blacklist "invsqrttab"
+
+module powm.Powm
+
+prelude
+"\n#include \"binverttab.h\"\
+\n\
+\nuint64_t binvert_limb_table (uint64_t n) {\
+\n  return (uint64_t)binverttab[n];\
+\n}"
+
+syntax val binvert_limb_table "binvert_limb_table"
+
+end
+
+blacklist "binverttab"
+
+module mach.int.UInt64GMP
+  interface "\
+    \ntypedef unsigned __int128 uint128_t;\
+    \n\
+    \nstruct __mul64_double_result {\
+    \n  uint64_t __field_0;\
+    \n  uint64_t __field_1;\
+    \n};\
+    \n\
+    \nstatic inline struct __mul64_double_result\
+    \nmul64_double(uint64_t x, uint64_t y)\
+    \n{\
+    \n  uint128_t z = (uint128_t)x * (uint128_t)y;\
+    \n  struct __mul64_double_result result = { z, z >> 64 };\
+    \n  return result;\
+    \n}\
+    \n\
+    \nstatic inline uint64_t\
+    \ndiv64_2by1(uint64_t ul, uint64_t uh, uint64_t d)\
+    \n{\
+    \n  return (((uint128_t)uh << 64) | ul) / d;\
+    \n}\
+  "
+
+  syntax val mul_double "mul64_double"
+  syntax val div2by1 "div64_2by1"
+
+end
+
+blacklist "mul64_double" "div64_2by1"
+
+module ptralias.Alias
+
+  interface "\
+    \nstruct __open_sep_result {\
+    \n  uint64_t *__field_0;\
+    \n  uint64_t *__field_1;\
+    \n  uint64_t *__field_2;\
+    \n};\
+    \n\
+    \nstruct __open_rx_result {\
+    \n  uint64_t *__field_0;\
+    \n  uint64_t *__field_1;\
+    \n  uint64_t *__field_2;\
+    \n};\
+    \n\
+    \nstruct __open_shift_sep_result {\
+    \n  uint64_t *__field_0;\
+    \n  uint64_t *__field_1;\
+    \n};\
+    \n\
+    \nstatic inline struct __open_sep_result\
+    \nopen_sep (uint64_t *r, uint64_t *x, uint64_t *y)\
+    \n{\
+    \n  struct __open_sep_result result;\
+    \n  result.__field_0 = r;\
+    \n  result.__field_1 = x;\
+    \n  result.__field_2 = y;\
+    \n  return result;\
+    \n}\
+    \n\
+    \nstatic inline struct __open_rx_result\
+    \nopen_rx (uint64_t *x, uint64_t *y)\
+    \n{\
+    \n  struct __open_rx_result result;\
+    \n  result.__field_0 = x;\
+    \n  result.__field_1 = x;\
+    \n  result.__field_2 = y;\
+    \n  return result;\
+    \n}\
+    \n\
+    \nstatic inline struct __open_shift_sep_result\
+    \nopen_shift_sep (uint64_t *r, uint64_t *x)\
+    \n{\
+    \n  struct __open_shift_sep_result result;\
+    \n  result.__field_0 = r;\
+    \n  result.__field_1 = x;\
+    \n  return result;\
+    \n}\
+  "
+
+  syntax val open_sep "open_sep"
+  syntax val open_rx "open_rx"
+  syntax val open_shift_sep "open_shift_sep"
+  syntax val close_sep "IGNORE3(%1, %2, %3)" prec 1 15 15 15
+  syntax val close_rx "IGNORE2(%1, %2)" prec 1 15 15
+  syntax val close_shift_sep "IGNORE2(%1, %2)" prec 1 15 15
+
+end
+
+module mpz.Z
+
+interface
+"\ntypedef struct\
+\n{\
+\n  int _alloc;\
+\n  int _size;\
+\n  uint64_t * _ptr;\
+\n} __wmpz_struct;\
+\n\
+\ntypedef __wmpz_struct *wmpz_ptr;\
+\ntypedef __wmpz_struct wmpz_t[1];\
+\n\
+\n#define SIZ(x) ((x)->_size)\
+\n#define ALLOC(x) ((x)->_alloc)\
+\n#define PTR(x) ((x)->_ptr)\
+\n\
+"
+
+  syntax type mpz_ptr "wmpz_ptr"
+  syntax type mpz_struct "__wmpz_struct"
+  syntax val mpz_eq "%1 == %2" prec 7 15 14
+  syntax val size_of "SIZ(%1)" prec 1 15
+  syntax val alloc_of "ALLOC(%1)" prec 1 15
+end
+
+module mpz.Zutil
+
+prelude
+"\nvoid __wmpz_init (wmpz_ptr x) {\
+\n  ALLOC(x) = 1;\
+\n  SIZ(x) = 0;\
+\n  PTR(x) = malloc(sizeof(uint64_t));\
+\n  PTR(x)[0] = 0;\
+\n  return;\
+\n}"
+
+prelude
+"\nvoid wmpz_clear (wmpz_ptr x)\
+\n{\
+\n  free (PTR(x));\
+\n}"
+
+interface "\n\
+void __wmpz_init (wmpz_ptr);\
+\nvoid wmpz_clear (wmpz_ptr);\
+"
+
+  syntax val set_size "SIZ(%1) = %2" prec 14 15 14
+  syntax val set_size_0 "SIZ(%1) = 0" prec 14 15
+  syntax val wmpz_minus "SIZ(%1) = -SIZ(%1)" prec 14 15 15
+  syntax val set_alloc "ALLOC(%1) = %2" prec 14 15 14
+  syntax val set_ptr "PTR(%1) = %2" prec 14 15 14
+  syntax val get_read_ptr "PTR(%1)" prec 1 15
+  syntax val get_write_ptr "PTR(%1)" prec 1 15
+  syntax val release_reader "(void)(%1)" prec 2 15
+  syntax val release_writer "(void)(%1)" prec 2 15
+  syntax val wmpz_init "__wmpz_init" prec 2
+  syntax val wmpz_tmp_decl "{ 0, 0, NULL }" prec 2
+  syntax val wmpz_struct_to_ptr "&%1" prec 2 2
+  syntax val wmpz_clear "wmpz_clear" prec 2
+
+end
+
+blacklist "__wmpz_init"
+
+module types.Types
+  remove module
+end
+
+module types.Int32Eq
+  remove module
+end
+
+module types.UInt64Eq
+  remove module
+end
+
+module logical.LogicalUtil
+  remove module
+end

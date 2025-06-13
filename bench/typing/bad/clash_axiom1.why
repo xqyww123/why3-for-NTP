@@ -1,0 +1,13 @@
+
+(* test file *)
+
+theory A
+  type t
+  axiom Ax: forall x: t. x=x
+end
+
+theory B
+  use export A
+  axiom Ax: forall x: t. x=x
+end
+

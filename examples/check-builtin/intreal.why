@@ -1,0 +1,15 @@
+
+theory IntReal
+  use int.Int
+  use real.RealInfix
+  use real.FromInt
+  use real.Truncate
+
+  goal G1 : from_int 2 = 2.0
+  goal G2 : floor 1.5 = 1
+  goal G3 : ceil 1.5 = 2
+  goal G4 : floor (-. 1.5) = -2
+  goal G5 : ceil (-. 1.5) = -1
+  goal G6 : forall x : real. floor x <= ceil x
+  goal G7 : forall x : real. floor x < ceil x -> from_int (floor x) <> x
+end

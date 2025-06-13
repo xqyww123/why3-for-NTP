@@ -1,0 +1,34 @@
+theory TreeForest
+  type list 'a = Nil | Cons 'a (list 'a)
+  type tree 'a = Leaf 'a | Node (tree 'a) (forest 'a)
+  with forest 'a = list (tree 'a)
+
+  use int.Int
+
+  function count_forest (f : forest int) : int =
+    match f, 10 with
+    | Nil, i -> i
+    | Cons t' f', _ -> count_tree t' + count_forest f'
+    end
+
+  with count_tree (t : tree int) : int =
+    match t with
+    | Leaf i -> i
+    | Node t' f' -> count_tree t' + count_forest f'
+    end
+
+  type nat = Zero | Succ nat
+
+  function ack (m n : nat) : nat = match m, n with
+    | Zero, _ -> Succ n
+    | Succ m', Zero -> ack' m' (Succ Zero)
+    | Succ m', Succ n' -> ack' m' (ack' m n')
+    end
+
+  with ack' (m n : nat) : nat = match m, n with
+    | Zero, _ -> Succ n
+    | Succ m', Zero -> ack m' (Succ Zero)
+    | Succ m', Succ n' -> ack m' (ack m n')
+    end
+
+end

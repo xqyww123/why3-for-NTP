@@ -1,0 +1,129 @@
+# bash completion for Why3
+
+# To use this script you should have bash-completion package installed
+# Put it in /etc/bash_completion.d or just source it from your .bashrc
+
+_why3()
+{
+    local cur prev words cword split
+
+    if declare -F _init_completion > /dev/null ; then
+        _init_completion -s || return
+    else
+        _get_comp_words_by_ref -n = cur prev words cword
+    fi
+
+    case "$prev" in
+        -T|--theory)
+            # this only completes the first '-T' option
+            # also, we cannot complete library theories
+            ${split:-false} || cword=$((cword-1))
+            words=("${words[@]:0:$cword}" --print-namespace)
+            theories=$(${words[@]} 2>/dev/null | sed -n -e 's/^\([^ ][^-]*\).*/\1/p')
+            COMPREPLY=( $( compgen -W "$theories" -- "$cur" ) )
+            return 0
+            ;;
+        -G|--goal)
+            ${split:-false} || cword=$((cword-1))
+            words=("${words[@]:0:$cword}" --print-namespace)
+            goals=$(${words[@]} 2>/dev/null | sed -n -e 's/.*-goal //p')
+            COMPREPLY=( $( compgen -W "$goals" -- "$cur" ) )
+            return 0
+            ;;
+        -C|--config|--extra-config)
+            _filedir
+            return 0
+            ;;
+        -L|--library|-I)
+            _filedir -d
+            return 0
+            ;;
+        -P|--prover)
+            provers=$($1 config list-provers | sed -n -e 's/^\([^ ]\+\).*/\1/p' | uniq)
+            COMPREPLY=( $( compgen -W "$provers" -- "$cur" ) )
+            return 0
+            ;;
+        -F|--format)
+            formats=$($1 show formats | sed -n -e 's/^\([^ ]\+\).*/\1/p')
+            COMPREPLY=( $( compgen -W "$formats" -- "$cur" ) )
+            return 0
+            ;;
+        -t|--timelimit|-m|--memlimit)
+            return 0
+            ;;
+        -a|--apply-transform)
+            transforms=$($1 show transformations | grep -e '^  [^ ]')
+            COMPREPLY=( $( compgen -W "$transforms" -- "$cur" ) )
+            return 0
+            ;;
+        -M|--meta)
+            metas=$($1 show metas |
+                grep -e '^[^ ]\+\( (flag)\)\?\( \[string\]\)\?$' |
+                sed -e 's/ (flag)//;s/ \[string\]/=/')
+            COMPREPLY=( $( compgen -W "$metas" -- "$cur") )
+            return 0
+            ;;
+        -D|--driver)
+            _filedir
+            return 0
+            ;;
+        -o|--output)
+            _filedir -d
+            return 0
+            ;;
+        --install-plugin)
+            _filedir
+            return 0
+            ;;
+        add-prover)
+            ids=$($1 config list-supported-provers)
+            COMPREPLY=( $( compgen -W "$ids" -- "$cur") )
+            return 0
+            ;;
+        --smoke-detector)
+            COMPREPLY=( $( compgen -W 'none top deep' -- "$cur" ) )
+            return 0
+            ;;
+        --debug)
+            flags=$($1 --list-debug-flags | sed -n -e 's/^\([^ ]\+\).*/\1/p')
+            COMPREPLY=( $( compgen -W "$flags" -- "$cur" ) )
+            return 0
+            ;;
+        --filter-prover)
+            provers=$($1 config list-provers | sed -n -e 's/^\([^ ]\+\).*/\1/p' | uniq)
+            COMPREPLY=( $( compgen -W "$provers" -- "$cur" ) )
+            return 0
+            ;;
+        --filter-obsolete|--filter-archived|--filter-verified-goal|--filter-verified)
+            COMPREPLY=( $( compgen -W 'yes no all' -- "$cur" ) )
+            return 0
+            ;;
+        --style)
+            COMPREPLY=( $( compgen -W 'simpletree table' -- "$cur" ) )
+            return 0
+            ;;
+        config|session|show)
+            cmds=$($1 $prev --help | sed -n -e 's/^  \([^ ]\+\).*/\1/p')
+            COMPREPLY=( $( compgen -W "$cmds --help -h" -- "$cur" ) )
+            return 0
+            ;;
+    esac
+
+    case "$cur" in
+        -*) words[cword]="--help"
+            opts=$(_parse_help "${words[@]}")
+            COMPREPLY=( $( compgen -W "$opts" -- "$cur" ) )
+            [[ $COMPREPLY == *= ]] && compopt -o nospace
+            return 0
+            ;;
+    esac
+
+    if [ $cword -eq 1 ] ; then
+        cmds=$($1 --help 2>&1 | sed -n -e 's/^  \([a-z]\+\).*/\1/p')
+        COMPREPLY=( $( compgen -W "$cmds" -- "$cur" ) )
+        return 0
+    fi
+
+    _filedir
+
+} && complete -F _why3 why3 why3.opt why3.byte

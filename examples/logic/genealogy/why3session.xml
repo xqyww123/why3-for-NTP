@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"https://www.why3.org/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="Z3" version="4.11.2" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="1" name="Alt-Ergo" version="2.3.3" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Zenon" version="0.8.0" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="4" name="CVC5" version="1.0.5" timelimit="5" steplimit="0" memlimit="0"/>
+<prover id="5" name="Coq" version="8.19.2" timelimit="5" steplimit="0" memlimit="4000"/>
+<prover id="6" name="CVC4" version="1.4" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="7" name="CVC3" version="2.2" timelimit="5" steplimit="0" memlimit="0"/>
+<prover id="9" name="Spass" version="3.7" timelimit="5" steplimit="0" memlimit="0"/>
+<prover id="11" name="Simplify" version="1.5.4" timelimit="3" steplimit="0" memlimit="1000"/>
+<prover id="12" name="Yices" version="1.0.38" timelimit="5" steplimit="0" memlimit="0"/>
+<prover id="13" name="Zenon" version="0.7.1" timelimit="5" steplimit="0" memlimit="4000"/>
+<prover id="15" name="Metis" version="2.3" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="19" name="veriT" version="201310" timelimit="5" steplimit="0" memlimit="4000"/>
+<prover id="22" name="Vampire" version="0.6" timelimit="3" steplimit="0" memlimit="1000"/>
+<prover id="24" name="veriT" version="201410" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="25" name="Alt-Ergo" version="2.1.0" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="26" name="Zenon Modulo" version="0.4.1" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="27" name="Eprover" version="2.0" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="30" name="Isabelle" version="2021-1" timelimit="100" steplimit="0" memlimit="4000"/>
+<prover id="31" name="CVC4" version="1.5" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="32" name="Alt-Ergo" version="2.2.0" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="35" name="CVC4" version="1.7" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="36" name="Alt-Ergo" version="2.3.0" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="40" name="Alt-Ergo" version="2.4.0" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="45" name="CVC4" version="1.8" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="46" name="Alt-Ergo" version="2.4.1" timelimit="5" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="genealogy.why"/>
+<theory name="Genealogy" proved="true">
+ <goal name="Child_is_son_or_daughter" proved="true">
+ <proof prover="0" timelimit="1"><result status="valid" time="0.010000" steps="1150"/></proof>
+ <proof prover="1"><result status="valid" time="0.000000" steps="9"/></proof>
+ <proof prover="2"><result status="valid" time="0.020000"/></proof>
+ <proof prover="4"><result status="valid" time="0.000000" steps="271"/></proof>
+ <proof prover="5"><path name="genealogy_Genealogy_Child_is_son_or_daughter_1.v"/><result status="valid" time="0.240000"/></proof>
+ <proof prover="6"><result status="valid" time="0.000000"/></proof>
+ <proof prover="7"><result status="valid" time="0.000000"/></proof>
+ <proof prover="9"><result status="valid" time="0.010000"/></proof>
+ <proof prover="11"><result status="valid" time="0.000000"/></proof>
+ <proof prover="13"><result status="valid" time="0.040000"/></proof>
+ <proof prover="15"><result status="valid" time="0.020000"/></proof>
+ <proof prover="19" timelimit="60" memlimit="1000"><result status="valid" time="0.000000"/></proof>
+ <proof prover="22"><result status="valid" time="0.000000"/></proof>
+ <proof prover="24"><result status="valid" time="0.000000"/></proof>
+ <proof prover="25"><result status="valid" time="0.000000" steps="5"/></proof>
+ <proof prover="26"><result status="valid" time="0.020000"/></proof>
+ <proof prover="27"><result status="valid" time="0.010000"/></proof>
+ <proof prover="30"><path name="genealogy_Genealogy_Child_is_son_or_daughter_1.xml"/><result status="valid" time="26.200000"/></proof>
+ <proof prover="31"><result status="valid" time="0.000000" steps="313"/></proof>
+ <proof prover="32"><result status="valid" time="0.000000" steps="5"/></proof>
+ <proof prover="35"><result status="valid" time="0.020000" steps="321"/></proof>
+ <proof prover="36"><result status="valid" time="0.000000" steps="9"/></proof>
+ <proof prover="40"><result status="valid" time="0.010000" steps="5"/></proof>
+ <proof prover="45"><result status="valid" time="0.020000" steps="319"/></proof>
+ <proof prover="46"><result status="valid" time="0.000000" steps="5"/></proof>
+ </goal>
+ <goal name="Sibling_sym" proved="true">
+ <proof prover="0"><result status="valid" time="0.010000" steps="1276"/></proof>
+ <proof prover="1"><result status="valid" time="0.000000" steps="4"/></proof>
+ <proof prover="4"><result status="valid" time="0.000000" steps="221"/></proof>
+ <proof prover="6"><result status="valid" time="0.000000"/></proof>
+ <proof prover="9"><result status="valid" time="0.000000"/></proof>
+ <proof prover="11"><result status="valid" time="0.000000"/></proof>
+ <proof prover="12"><result status="valid" time="0.000000"/></proof>
+ <proof prover="15"><result status="valid" time="0.120000"/></proof>
+ <proof prover="19"><result status="valid" time="0.000000"/></proof>
+ <proof prover="22"><result status="valid" time="0.000000"/></proof>
+ <proof prover="24"><result status="valid" time="0.000000"/></proof>
+ <proof prover="25"><result status="valid" time="0.000000" steps="4"/></proof>
+ <proof prover="26"><result status="valid" time="0.020000"/></proof>
+ <proof prover="27"><result status="valid" time="0.000000"/></proof>
+ <proof prover="30"><path name="genealogy_Genealogy_Sibling_sym_1.xml"/><result status="valid" time="25.980000"/></proof>
+ <proof prover="31"><result status="valid" time="0.000000" steps="295"/></proof>
+ <proof prover="32"><result status="valid" time="0.000000" steps="4"/></proof>
+ <proof prover="35"><result status="valid" time="0.020000" steps="299"/></proof>
+ <proof prover="36"><result status="valid" time="0.000000" steps="4"/></proof>
+ <proof prover="40"><result status="valid" time="0.000000" steps="4"/></proof>
+ <proof prover="45"><result status="valid" time="0.020000" steps="298"/></proof>
+ <proof prover="46"><result status="valid" time="0.000000" steps="4"/></proof>
+ </goal>
+ <goal name="Sibling_is_brother_or_sister" proved="true">
+ <proof prover="0"><result status="valid" time="0.010000" steps="1385"/></proof>
+ <proof prover="1"><result status="valid" time="0.000000" steps="9"/></proof>
+ <proof prover="2"><result status="valid" time="0.030000"/></proof>
+ <proof prover="4"><result status="valid" time="0.000000" steps="310"/></proof>
+ <proof prover="6"><result status="valid" time="0.000000"/></proof>
+ <proof prover="7"><result status="valid" time="0.000000"/></proof>
+ <proof prover="9"><result status="valid" time="0.010000"/></proof>
+ <proof prover="11"><result status="valid" time="0.000000"/></proof>
+ <proof prover="13"><result status="valid" time="0.030000"/></proof>
+ <proof prover="15"><result status="valid" time="0.040000"/></proof>
+ <proof prover="19"><result status="valid" time="0.000000"/></proof>
+ <proof prover="22"><result status="valid" time="0.000000"/></proof>
+ <proof prover="24"><result status="valid" time="0.000000"/></proof>
+ <proof prover="25"><result status="valid" time="0.000000" steps="5"/></proof>
+ <proof prover="26"><result status="valid" time="0.010000"/></proof>
+ <proof prover="27"><result status="valid" time="0.010000"/></proof>
+ <proof prover="30"><path name="genealogy_Genealogy_Sibling_is_brother_or_sister_1.xml"/><result status="valid" time="25.750000"/></proof>
+ <proof prover="31"><result status="valid" time="0.000000" steps="375"/></proof>
+ <proof prover="32"><result status="valid" time="0.000000" steps="5"/></proof>
+ <proof prover="35"><result status="valid" time="0.020000" steps="380"/></proof>
+ <proof prover="36"><result status="valid" time="0.000000" steps="9"/></proof>
+ <proof prover="40"><result status="valid" time="0.010000" steps="5"/></proof>
+ <proof prover="45"><result status="valid" time="0.020000" steps="378"/></proof>
+ </goal>
+ <goal name="Grandparent_is_grandfather_or_grandmother" proved="true">
+ <proof prover="0"><result status="valid" time="0.010000" steps="314"/></proof>
+ <proof prover="1"><result status="valid" time="0.000000" steps="21"/></proof>
+ <proof prover="4"><result status="valid" time="0.000000" steps="265"/></proof>
+ <proof prover="6"><result status="valid" time="0.010000"/></proof>
+ <proof prover="7"><result status="valid" time="0.000000"/></proof>
+ <proof prover="11"><result status="valid" time="0.000000"/></proof>
+ <proof prover="12"><result status="valid" time="0.040000"/></proof>
+ <proof prover="15"><result status="valid" time="0.070000"/></proof>
+ <proof prover="19"><result status="valid" time="0.000000"/></proof>
+ <proof prover="22"><result status="valid" time="0.010000"/></proof>
+ <proof prover="24"><result status="valid" time="0.000000"/></proof>
+ <proof prover="25"><result status="valid" time="0.000000" steps="20"/></proof>
+ <proof prover="26"><result status="valid" time="0.020000"/></proof>
+ <proof prover="27"><result status="valid" time="0.010000"/></proof>
+ <proof prover="30"><path name="genealogy_Genealogy_Grandparent_is_grandfather_or_grandmother_1.xml"/><result status="valid" time="25.380000"/></proof>
+ <proof prover="31"><result status="valid" time="0.000000" steps="314"/></proof>
+ <proof prover="32"><result status="valid" time="0.000000" steps="20"/></proof>
+ <proof prover="35"><result status="valid" time="0.020000" steps="316"/></proof>
+ <proof prover="36"><result status="valid" time="0.000000" steps="21"/></proof>
+ <proof prover="40"><result status="valid" time="0.000000" steps="20"/></proof>
+ <proof prover="45"><result status="valid" time="0.020000" steps="314"/></proof>
+ </goal>
+ <goal name="Grandfather_male" proved="true">
+ <proof prover="0"><result status="valid" time="0.010000" steps="1073"/></proof>
+ <proof prover="1"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="4"><result status="valid" time="0.000000" steps="406"/></proof>
+ <proof prover="6"><result status="valid" time="0.000000"/></proof>
+ <proof prover="7"><result status="valid" time="0.000000"/></proof>
+ <proof prover="9"><result status="valid" time="0.020000"/></proof>
+ <proof prover="11"><result status="valid" time="0.000000"/></proof>
+ <proof prover="12"><result status="valid" time="0.020000"/></proof>
+ <proof prover="15"><result status="valid" time="0.030000"/></proof>
+ <proof prover="19"><result status="valid" time="0.000000"/></proof>
+ <proof prover="22"><result status="valid" time="0.030000"/></proof>
+ <proof prover="24"><result status="valid" time="0.000000"/></proof>
+ <proof prover="25"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="26"><result status="valid" time="0.020000"/></proof>
+ <proof prover="27"><result status="valid" time="0.010000"/></proof>
+ <proof prover="31"><result status="valid" time="0.000000" steps="331"/></proof>
+ <proof prover="32"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="35"><result status="valid" time="0.020000" steps="385"/></proof>
+ <proof prover="36"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="40"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="45"><result status="valid" time="0.020000" steps="434"/></proof>
+ </goal>
+ <goal name="Grandmother_female" proved="true">
+ <proof prover="0"><result status="valid" time="0.010000" steps="1068"/></proof>
+ <proof prover="1"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="4"><result status="valid" time="0.000000" steps="417"/></proof>
+ <proof prover="6"><result status="valid" time="0.000000"/></proof>
+ <proof prover="7"><result status="valid" time="0.000000"/></proof>
+ <proof prover="9"><result status="valid" time="0.020000"/></proof>
+ <proof prover="11"><result status="valid" time="0.010000"/></proof>
+ <proof prover="12"><result status="valid" time="0.030000"/></proof>
+ <proof prover="15"><result status="valid" time="0.030000"/></proof>
+ <proof prover="19"><result status="valid" time="0.000000"/></proof>
+ <proof prover="22"><result status="valid" time="0.010000"/></proof>
+ <proof prover="24"><result status="valid" time="0.000000"/></proof>
+ <proof prover="25"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="26"><result status="valid" time="0.020000"/></proof>
+ <proof prover="27"><result status="valid" time="0.000000"/></proof>
+ <proof prover="31"><result status="valid" time="0.000000" steps="329"/></proof>
+ <proof prover="32"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="35"><result status="valid" time="0.020000" steps="392"/></proof>
+ <proof prover="36"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="40"><result status="valid" time="0.000000" steps="11"/></proof>
+ <proof prover="45"><result status="valid" time="0.020000" steps="441"/></proof>
+ </goal>
+ <goal name="Only_two_grandfathers" proved="true">
+ <proof prover="0" timelimit="1"><result status="valid" time="0.010000" steps="1499"/></proof>
+ <proof prover="1"><result status="valid" time="0.000000" steps="18"/></proof>
+ <proof prover="4"><result status="valid" time="0.000000" steps="394"/></proof>
+ <proof prover="6"><result status="valid" time="0.010000"/></proof>
+ <proof prover="7"><result status="valid" time="0.000000"/></proof>
+ <proof prover="9"><result status="valid" time="0.010000"/></proof>
+ <proof prover="11"><result status="valid" time="0.000000"/></proof>
+ <proof prover="12"><result status="valid" time="0.000000"/></proof>
+ <proof prover="15"><result status="valid" time="0.050000"/></proof>
+ <proof prover="19"><result status="valid" time="0.000000"/></proof>
+ <proof prover="22"><result status="valid" time="0.010000"/></proof>
+ <proof prover="24"><result status="valid" time="0.000000"/></proof>
+ <proof prover="25"><result status="valid" time="0.000000" steps="18"/></proof>
+ <proof prover="26"><result status="valid" time="0.020000"/></proof>
+ <proof prover="27"><result status="valid" time="0.010000"/></proof>
+ <proof prover="31"><result status="valid" time="0.000000" steps="475"/></proof>
+ <proof prover="32"><result status="valid" time="0.000000" steps="18"/></proof>
+ <proof prover="35"><result status="valid" time="0.020000" steps="474"/></proof>
+ <proof prover="36"><result status="valid" time="0.000000" steps="18"/></proof>
+ <proof prover="40"><result status="valid" time="0.010000" steps="18"/></proof>
+ <proof prover="45"><result status="valid" time="0.020000" steps="473"/></proof>
+ <proof prover="46" timelimit="1"><result status="valid" time="0.000000" steps="18"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>

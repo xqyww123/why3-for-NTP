@@ -1,0 +1,251 @@
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 27, characters 45-49:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (2019 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 27, characters 21-25:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (2060 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 27, characters 5-81:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (2136 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 28, characters 64-68:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (3021 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 28, characters 21-25:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (3090 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 28, characters 5-82:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (3175 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 29, characters 64-68:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (4634 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 29, characters 21-25:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (4717 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 29, characters 5-82:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (4802 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 30, characters 74-78:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (6950 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 30, characters 41-45:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (7049 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 30, characters 5-92:
+Sub-goal Index in array bounds of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (7136 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = -1
+    i : int = -1
+
+File "bench/check-ce/array_records_poly.mlw", line 31, characters 13-35:
+Sub-goal Assertion of goal var_overwrite'vc.
+Prover result is: Valid (5958 steps).
+
+<check_ce:categorization>Categorizations of models:
+- Checked model 0: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+- Selected model 1: INCOMPLETE
+  - Concrete RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+  - Abstract RAC: INCOMPLETE (terminated because Precondition of `var_overwrite` cannot be evaluated)
+File "bench/check-ce/array_records_poly.mlw", line 25, characters 15-36:
+Sub-goal Postcondition of goal var_overwrite'vc.
+Prover result is: Unknown (unknown + incomplete) (9798 steps).
+The following counterexample model could not be verified
+  (both RAC terminated because Precondition of `var_overwrite` cannot be evaluated):
+File array_records_poly.mlw:
+  Line 23:
+    a :  = [|_ => epsilon _. true|]
+    a :  = [|_ => epsilon _. true|]
+    i :  = 0
+    i : int = 0
+

@@ -1,0 +1,13 @@
+
+(* test file *)
+
+theory A
+  type t
+  axiom Ax : forall _x:t. true
+end
+
+theory B
+  use A as A
+  use A as A
+end
+

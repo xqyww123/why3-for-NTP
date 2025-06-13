@@ -1,0 +1,4 @@
+theory Test
+  type list 'a = Nil | Cons 'a (list 'a)
+  axiom Ax : Cons Nil Nil = Nil
+end

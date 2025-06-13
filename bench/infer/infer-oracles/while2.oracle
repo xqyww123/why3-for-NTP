@@ -1,0 +1,10 @@
+CFG size: 79 nodes, 80 hyperedges
+Time elapsed 0.069985s
+### Debug: inferred invariants ###
+(0 < contents i /\ contents i <= 10) /\ (2 * contents i) = (2 + contents j)
+(0 < contents i /\ contents i <= 10) /\ (2 * contents i) = (2 + contents j)
+###
+File bench/infer/while2.mlw:
+Goal b'vc.
+Prover result is: Valid (0.00s, 22 steps).
+

@@ -1,0 +1,7 @@
+
+(* test file *)
+
+theory A
+  function c : t
+end
+

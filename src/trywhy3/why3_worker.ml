@@ -1,0 +1,408 @@
+(********************************************************************)
+(*                                                                  *)
+(*  The Why3 Verification Platform   /   The Why3 Development Team  *)
+(*  Copyright 2010-2024 --  Inria - CNRS - Paris-Saclay University  *)
+(*                                                                  *)
+(*  This software is distributed under the terms of the GNU Lesser  *)
+(*  General Public License version 2.1, with the special exception  *)
+(*  on linking described in file LICENSE.                           *)
+(*                                                                  *)
+(********************************************************************)
+
+
+(* Interface to Why3 *)
+
+let why3_conf_file = "/trywhy3.conf"
+
+open Why3
+open Format
+open Worker_proto
+open Bindings
+
+module Sys_js = Js_of_ocaml.Sys_js
+module Worker = Js_of_ocaml.Worker
+
+let () = log_time ("Initialising why3 worker: start ")
+
+(* Name of the pseudo file *)
+
+let temp_file_name = "/trywhy3_input.mlw"
+
+(* reads the config file *)
+let config : Whyconf.config = Whyconf.read_config (Some why3_conf_file)
+(* the [main] section of the config file *)
+let main : Whyconf.main = Whyconf.get_main config
+(* all the provers detected, from the config file *)
+let provers : Whyconf.config_prover Whyconf.Mprover.t =
+  Whyconf.get_provers config
+
+(* One prover named Alt-Ergo in the config file *)
+let alt_ergo : Whyconf.config_prover =
+  if Whyconf.Mprover.is_empty provers then begin
+    eprintf "Prover Alt-Ergo not installed or not configured@.";
+    exit 0
+  end else snd (Whyconf.Mprover.choose provers)
+
+(* builds the environment from the [loadpath] *)
+let env : Env.env = Env.create_env (Whyconf.loadpath main)
+
+let alt_ergo_driver : Driver.driver =
+  try
+    Printexc.record_backtrace true;
+    Driver.load_driver_for_prover main env alt_ergo
+  with e ->
+    let s = Printexc.get_backtrace () in
+    eprintf "Failed to load driver for alt-ergo: %a@.%s@."
+      Exn_printer.exn_printer e s;
+  exit 1
+
+let () = log_time ("Initialising why3 worker: end ")
+
+let split_trans = Trans.lookup_transform_l "split_vc" env
+
+(* CF gmain.ml ligne 568 et suivante *)
+module W =
+  struct
+    let send msg =
+      ignore (Worker.post_message (marshal msg))
+
+    let set_onmessage f =
+      Worker.set_onmessage (fun data -> f (unmarshal data))
+  end
+
+(* Task Management *)
+module Why3Task = Task (* prevent shadowing *)
+
+module Task =
+  struct
+    type task_kind = Theory of Theory.theory | Task of Task.task
+
+    type task_info = {
+        task : task_kind;
+	parent_id : id;
+	mutable status : status;
+	mutable subtasks : id list;
+	loc : why3_loc list;
+	expl : string;
+        pretty : string;
+      }
+
+    let task_table : (id, task_info) Hashtbl.t = Hashtbl.create 17
+
+    let clear_table () = Hashtbl.clear task_table
+    let get_info id = Hashtbl.find task_table id
+    let get_info_opt id =
+      try
+        Some (get_info id)
+      with
+        Not_found -> None
+
+    let mk_loc (f,a,b,c,d) =
+      if f = temp_file_name then
+        Some (a,b,c,d)
+      else None
+
+
+    let warnings = ref []
+    let clear_warnings () = warnings := []
+    let () =
+      Loc.set_warning_hook
+        (fun ?(loc=(Loc.user_position "" 1 0 1 0)) msg ->
+          let _, a, b,_, _ = Loc.get loc in
+          warnings := ((a-1,b), msg) :: !warnings)
+
+
+    let premise_kind = function
+      | { Term. t_node = Term.Tnot _; t_loc = None } -> "why3-loc-neg-premise"
+      | _ -> "why3-loc-premise"
+
+    let collect_locs t =
+      (* from why 3 ide *)
+      let locs = ref [] in
+      let rec get_locs kind f =
+        Option.iter (fun loc ->
+            match mk_loc (Loc.get loc) with
+              None -> ()
+            | Some l -> locs := (kind, l) :: !locs) f.Term.t_loc;
+        Term.t_fold (fun () t -> get_locs kind t ) () f
+      in
+      let rec get_t_locs f =
+        match f.Term.t_node with
+        | Term.Tbinop (Term.Timplies,f1,f2) ->
+           get_locs (premise_kind f1) f1;
+           get_t_locs f2
+        | Term.Tlet (t,fb) ->
+           let _,f1 = Term.t_open_bound fb in
+           get_locs (premise_kind t) t;
+           get_t_locs f1
+        | Term.Tquant (Term.Tforall,fq) ->
+           let _,_,f1 = Term.t_open_quant fq in
+           get_t_locs f1
+        | _ ->
+           get_locs "why3-loc-goal" f
+      in
+      match t with
+      | Some { Task.task_decl =
+                 { Theory.td_node =
+                     Theory.Decl { Decl.d_node = Decl.Dprop (Decl.Pgoal, _, f)}}} ->
+         get_t_locs f; !locs
+      |  _ -> []
+
+    let task_to_string t =
+      Format.asprintf "%a" (Driver.print_task alt_ergo_driver) t
+
+    let gen_id =
+      let c = ref 0 in
+      fun () -> incr c; !c
+
+    let task_text t =
+      Pp.string_of Pretty.print_sequent t
+
+    let register_task parent_id task =
+      let id = gen_id () in
+      let vid, expl, _ = Termcode.goal_expl_task ~root:false task in
+      let id_loc = match vid.Ident.id_loc with
+          None -> []
+        | Some l -> begin match mk_loc (Loc.get l) with
+              Some l -> [ ("why3-loc-goal", l) ]
+            | None -> []
+          end
+      in
+      let task_info =
+        { task = Task task;
+	  parent_id = parent_id;
+	  status = StNew;
+	  subtasks = [];
+	  loc = id_loc @  (collect_locs task);
+	  expl = expl;
+          pretty = task_text task;
+        }
+      in
+      Hashtbl.add task_table id task_info;
+      id
+
+    let register_theory th_name th =
+      let th_id = gen_id () in
+      let tasks = Why3Task.split_theory th None None in
+      let task_ids = List.fold_left (fun acc t ->
+				     let tid = register_task th_id t in
+				     tid:: acc) [] tasks in
+      Hashtbl.add task_table th_id  {
+          task = Theory th;
+          parent_id = 0;
+          status = StNew;
+          subtasks = List.rev task_ids;
+          loc = [];
+          expl = th_name;
+          pretty = "";
+        };
+      th_id
+
+    let get_task = function
+      | Task t -> t
+      | Theory _ -> log ("called get_task on a theory !"); assert false
+
+    let set_status id st =
+      let rec loop id st acc =
+        match get_info_opt id with
+        | Some info when info.status <> st ->
+	   info.status <- st;
+           let acc = (UpdateStatus (st, id)) :: acc in
+           begin
+             match get_info_opt info.parent_id with
+               None -> acc
+             | Some par_info ->
+	        let has_new, has_unknown =
+	          List.fold_left
+	            (fun (an, au) id ->
+	             let info = Hashtbl.find task_table id in
+	             (an || info.status = StNew), (au || info.status = StUnknown))
+	            (false, false) par_info.subtasks
+	        in
+	        let par_status =
+                  if has_new then StNew
+                  else if has_unknown then StUnknown
+                  else StValid
+	        in
+	        if par_info.status <> par_status then
+	          loop info.parent_id par_status acc
+                else acc
+           end
+        | _ -> acc
+
+      in
+      loop id st []
+
+    let rec clean_task id =
+      try
+        let info = get_info id in
+        List.iter clean_task info.subtasks;
+        Hashtbl.remove task_table id
+      with
+        Not_found -> ()
+
+  end
+
+
+
+(* External API *)
+
+
+let rec why3_prove ?(steps= ~-1) id =
+  let open Task in
+  let t = get_info id in
+  match t.subtasks with
+  | [] ->
+      t.status <- StUnknown;
+      let task = get_task t.task in
+      let msg = Worker_proto.Task (id, t.parent_id, t.expl, task_to_string task, t.loc, t.pretty, steps) in
+      W.send msg;
+      let l = set_status id StNew in
+      List.iter W.send l
+  | l -> List.iter (why3_prove ~steps) l
+
+
+
+let rec why3_split t orig id steps unfold =
+  let open Task in
+  match Trans.apply split_trans orig with
+    | [] -> ()
+    | [ child ] when Why3.Task.task_equal child orig ->
+        if unfold then why3_split t (Trans.apply Inlining.goal orig) id steps false
+    | subtasks ->
+        t.subtasks <- List.map (fun t -> register_task id t) subtasks;
+        List.iter (fun i -> why3_prove i ~steps) t.subtasks
+
+let why3_split steps id =
+  let open Task in
+  let t = get_info id in
+  match t.subtasks with
+  | [] -> why3_split t (get_task t.task) id steps true
+  | _ -> ()
+
+
+
+let why3_clean id =
+  let open Task in
+  try
+    let t = get_info id in
+    List.iter clean_task t.subtasks;
+    t.subtasks <- [];
+    let l = set_status id StUnknown in
+    List.iter W.send l
+  with
+    Not_found -> ()
+
+let why3_parse_theories steps theories =
+  let theories =
+    Wstdlib.Mstr.fold
+      (fun thname th acc ->
+       let loc =
+         Option.value ~default:Loc.dummy_position th.Theory.th_name.Ident.id_loc
+       in
+       (loc, (thname, th)) :: acc) theories []
+  in
+  let theories = List.sort  (fun (l1,_) (l2,_) -> Loc.compare l1 l2) theories in
+  List.iter
+    (fun (_, (th_name, th)) ->
+     let th_id = Task.register_theory th_name th in
+     W.send (Theory(th_id, th_name));
+     let subs = (Task.get_info th_id).Task.subtasks in
+     W.send (UpdateStatus( (if subs == [] then StValid else StNew) , th_id));
+     List.iter (fun i -> why3_prove i ~steps) subs
+    ) theories
+
+let why3_execute_one m rs =
+  let open Expr in
+  let e_unit = e_exec (c_app (rs_tuple 0) [] [] (Ity.ity_tuple [])) in
+  let (let_defn,pv) = let_var (Ident.id_fresh "o") e_unit in
+  let e_rs_unit = e_exec (c_app rs [pv] [] rs.rs_cty.Ity.cty_result) in
+  let expr = e_let let_defn e_rs_unit in
+  let output = Buffer.create 17 in
+  Sys_js.set_channel_flusher stdout (fun v -> Buffer.add_string output v);
+  let {Theory.th_name = th} = m.Pmodule.mod_theory in
+  let mod_name = th.Ident.id_string in
+  let limits = Call_provers.empty_limits in
+  let result =
+    try
+      let ctx = Pinterp.mk_ctx ~limits (Pinterp.mk_empty_env env m)
+          ~do_rac:false ~giant_steps:false () in
+      let res = Pinterp.exec_global_fundef ctx [] None expr in
+      Format.print_flush ();
+      asprintf "@[<v>%s.main produces@,%a@,output:@,%s@]"
+        mod_name (Pinterp.report_eval_result expr) res
+        (Buffer.contents output)
+    with Pinterp_core.Cannot_decide (_,_,r) ->
+      asprintf "%s.main cannot compute (%s)" mod_name r in
+  let mod_loc = Option.value ~default:Loc.dummy_position th.Ident.id_loc in
+  (mod_loc, result)
+
+let why3_execute modules =
+  let mods =
+    Wstdlib.Mstr.fold (fun _ m acc ->
+        match Pmodule.ns_find_rs m.Pmodule.mod_export ["main"] with
+        | rs -> why3_execute_one m rs :: acc
+        | exception Not_found -> acc)
+      modules [] in
+  let result =
+    if mods = [] then
+      Error "No main function found"
+    else
+      let s = List.sort (fun (l1,_) (l2,_) -> Loc.compare l2 l1) mods in
+      Result (List.rev_map snd s) in
+  W.send result
+
+
+let () = Sys_js.create_file ~name:temp_file_name ~content:""
+
+let why3_run f format lang code =
+  try
+    let ch = open_out temp_file_name in
+    output_string ch code;
+    close_out ch;
+
+    let (theories, _) = Env.read_file ~format lang env temp_file_name in
+    W.send (Warning !Task.warnings);
+    f theories
+  with
+  | Loc.Located(loc,e') ->
+     let msg =
+       Pp.sprintf "error %a: %a" Loc.pp_position_no_file loc
+	 Exn_printer.exn_printer e'
+     in
+     let _, bl, bc, el, ec = Loc.get loc in
+     W.send (ErrorLoc ((bl-1, bc, el-1, ec),msg))
+  | e ->
+     W.send (Error (Pp.sprintf
+		      "unexpected exception: %a (%s)" Exn_printer.exn_printer e
+		      (Printexc.to_string e)))
+
+let handle_message = function
+  | Transform (Split steps, id) -> why3_split steps id
+  | Transform (Prove steps, id) -> why3_prove ~steps id
+  | Transform (Clean, id) -> why3_clean id
+  | ParseBuffer (format, code, steps) ->
+      Task.clear_warnings ();
+      Task.clear_table ();
+      why3_run (why3_parse_theories steps) format Env.base_language code
+  | ExecuteBuffer (format, code) ->
+      Task.clear_warnings ();
+      Task.clear_table ();
+      why3_run why3_execute format Pmodule.mlw_language code
+  | SetStatus (st, id) -> List.iter W.send (Task.set_status id st)
+  | GetFormats ->
+      let formats = Env.list_formats Env.base_language in
+      let formats = List.map (fun (name, ext, _) -> (name, ext)) formats in
+      W.send (Formats formats)
+
+
+let () =
+  W.set_onmessage (fun msg ->
+      handle_message msg;
+      W.send Idle
+    )
+(*
+Local Variables:
+compile-command: "unset LANG; make -C ../.. trywhy3"
+End:
+*)

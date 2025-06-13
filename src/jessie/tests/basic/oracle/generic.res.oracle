@@ -1,0 +1,63 @@
+[jessie3] Loading Why3 configuration...
+[jessie3] Why3 environment loaded.
+[jessie3] Loading Why3 theories...
+[jessie3] Loading Why3 modules...
+[kernel] Parsing FRAMAC_SHARE/libc/__fc_builtin_for_normalization.i (no preprocessing)
+[kernel] Parsing tests/basic/generic.c (with preprocessing)
+[jessie3] Loading prover drivers...
+[jessie3] Translating to Why3...
+[jessie3] Starting translation
+[jessie3] found 0 logic decl(s)
+[jessie3] made 1 theory(ies)
+[jessie3] made 0 function(s)
+[jessie3] Running provers...
+[jessie3] running theory 1:
+[jessie3] theory Bag
+            (* use why3.BuiltIn.BuiltIn *)
+            
+            (* use why3.Bool.Bool *)
+            
+            (* use why3.Unit.Unit *)
+            
+            (* use int.Int *)
+            
+            (* use int.ComputerDivision *)
+            
+            (* use real.Real *)
+            
+            (* use array.Array *)
+            
+            type bag 'x
+            
+            function occ 'x (bag 'x) : int
+            
+            function singleton 'x : bag 'x
+            
+            function bag_union (bag 'x) (bag 'x) : bag 'x
+            end
+[jessie3] Provers: Alt-Ergo 1.01, CVC4 1.4, Z3 4.4.1
+[jessie3] running theory 1:
+[jessie3] theory C_Functions
+            (* use why3.BuiltIn.BuiltIn *)
+            
+            (* use why3.Bool.Bool *)
+            
+            (* use why3.Unit.Unit *)
+            
+            (* use int.Int *)
+            
+            (* use int.ComputerDivision *)
+            
+            (* use real.Real *)
+            
+            (* use array.Array *)
+            
+            (* use Bag *)
+            
+            (* use ref.Ref *)
+            
+            (* use mach.bv.BVCheck32 *)
+            
+            (* use mach.int.Int64 *)
+            end
+[jessie3] Provers: Alt-Ergo 1.01, CVC4 1.4, Z3 4.4.1

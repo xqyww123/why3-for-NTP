@@ -1,0 +1,4 @@
+theory Test
+  type list 'a = Nil
+  axiom Ax : Nil=Nil
+end

@@ -1,0 +1,3 @@
+theory A end
+theory B end
+theory C use A as A use B as A end

@@ -1,0 +1,116 @@
+CFG size: 63 nodes, 64 hyperedges
+Time elapsed 0.041185s
+### Debug: inferred invariants ###
+((101 <= n0 /\ 0 <= contents e) /\ contents e <= 1) /\
+(n0 + (10 * contents e)) = (10 + contents n)
+###
+CFG size: 63 nodes, 64 hyperedges
+Time elapsed 0.160930s
+### Debug: inferred invariants ###
+(((((((((((((((((((102 <= (n01 + contents e1) /\ 0 < contents e1) /\
+                  n01 <= contents n1) /\
+                 202 <= (n01 + contents n1)) /\
+                (contents e1 + 100) <= contents n1) /\
+               102 <= (contents e1 + contents n1)) /\
+              101 <= contents n1) /\
+             ref'mk n01 = n1) /\
+            n01 = contents n1) /\
+           contents e1 = 1 \/
+           ((contents e1 + 101) <= n01 /\ contents e1 <= 0) /\
+           (contents n1 + 10) <= n01) /\
+          contents n1 <= n01) /\
+         91 <= contents n1) /\
+        91 <= (contents e1 + contents n1)) /\
+       (contents e1 + 91) <= contents n1) /\
+      192 <= (n01 + contents n1)) /\
+     n01 <= (10 + contents n1)) /\
+    contents e1 <= 1) /\
+   (contents e1 + 100) <= n01) /\
+  0 <= contents e1) /\
+ 101 <= (n01 + contents e1)) /\
+101 <= n01
+###
+CFG size: 63 nodes, 64 hyperedges
+Time elapsed 3.099792s
+### Debug: inferred invariants ###
+((2 <= contents e2 /\ contents n2 <= 111 \/ 91 <= contents n2) /\
+ 0 <= contents e2) /\
+101 <= n02
+###
+CFG size: 63 nodes, 64 hyperedges
+Time elapsed 0.220538s
+### Debug: inferred invariants ###
+((((((n03 + (11 * contents e3)) <= (10 + contents n3) /\ 91 <= contents n3 \/
+     ((n03 + (11 * contents e3)) = (11 + contents n3) /\
+      (n03 + (11 * contents e3)) <= 122) /\
+     0 < contents e3) /\
+    0 <= contents e3) /\
+   n03 <= (9 + contents n3)) /\
+  n03 <= 100) /\
+ (n03 + (11 * contents e3)) <= (11 + contents n3)) /\
+((10 * n03) + (99 * contents e3)) <= (99 + (10 * contents n3))
+###
+CFG size: 63 nodes, 64 hyperedges
+Time elapsed 1.057787s
+### Debug: inferred invariants ###
+((((((n04 = contents n4 /\ 1 = contents e4) /\ ref'mk n04 = n4) /\
+    n04 = contents n4) /\
+   contents e4 = 1 \/
+   (((n04 = (10 + contents n4) /\ 0 = contents e4) /\ 101 <= n04) /\
+    0 = contents e4) /\
+   (n04 - 10) = contents n4 \/
+   (((n04 + (11 * contents e4)) = (10 + contents n4) /\
+     (n04 + (11 * contents e4)) <= 111) /\
+    0 < contents e4) /\
+   101 <= (n04 + (11 * contents e4)) \/
+   ((n04 + (11 * contents e4)) = (11 + contents n4) /\
+    (n04 + (11 * contents e4)) <= 122) /\
+   2 <= contents e4 \/
+   (((n04 + (11 * contents e4)) <= (10 + contents n4) /\ contents n4 <= 111) /\
+    102 <= contents n4) /\
+   2 <= contents e4 \/
+   (n04 + (11 * contents e4)) <= (9 + contents n4) /\ 91 <= contents n4) /\
+  0 <= contents e4) /\
+ (n04 + (10 * contents e4)) <= (10 + contents n4)) /\
+(n04 + (11 * contents e4)) <= (11 + contents n4)
+###
+CFG size: 63 nodes, 64 hyperedges
+Time elapsed 2.997888s
+### Debug: inferred invariants ###
+(((1 = contents e5 /\ ref'mk n05 = n5) /\ n05 = contents n5) /\
+ contents e5 = 1 \/
+ 2 <= contents e5 /\ contents n5 <= 111 \/ 91 <= contents n5) /\
+0 <= contents e5
+###
+File bench/infer/mccarthy.mlw:
+Goal f91'vc.
+Prover result is: Valid (0.02s, 40 steps).
+
+File bench/infer/mccarthy.mlw:
+Goal f91_nonrec'vc.
+Prover result is: Valid (0.02s, 22 steps).
+
+File bench/infer/mccarthy.mlw:
+Goal f91_nonrec_oct'vc.
+Prover result is: Valid (0.02s, 52 steps).
+
+File bench/infer/mccarthy.mlw:
+Goal f91_nonrec_box'vc.
+Prover result is: Timeout (1.00s).
+
+File bench/infer/mccarthy.mlw:
+Goal f91_nonrec2'vc.
+Prover result is: Unknown () (0.80s).
+
+File bench/infer/mccarthy.mlw:
+Goal f91_nonrec_hard'vc.
+Prover result is: Timeout (1.00s).
+
+File bench/infer/mccarthy.mlw:
+Goal f91_nonrec_hard_box'vc.
+Prover result is: Timeout (1.00s).
+
+File bench/infer/mccarthy.mlw:
+Goal f91_pseudorec'vc.
+Prover result is: Valid (0.02s, 57 steps).
+

@@ -1,0 +1,62 @@
+theory Elements
+
+use int.Int
+use bag.Bag
+use export map.Map
+
+type array 'a = map int 'a
+
+(* [elements a i j] is the bag of elements in a[i..j[ *)
+function elements (a:array 'a) (i j:int) : bag 'a
+
+axiom Elements_empty : forall a:array 'a, i j:int.
+     i >= j -> (elements a i j) = empty_bag
+
+axiom Elements_add : forall a:array 'a, i j :int.
+       i < j ->
+       (elements a i j) = (add a[j-1] (elements a i (j-1)))
+
+lemma Elements_singleton : forall a:array 'a, i j:int.
+     j = i + 1 ->
+       (elements a i j) = (singleton a[i])
+
+lemma Elements_union : forall a:array 'a, i j k:int.
+     i <= j <= k  ->
+      (elements a i k) = (union (elements a i j) (elements a j k))
+
+lemma Elements_add1 : forall a:array 'a, i j :int.
+      i < j ->
+      (elements a i j) = (add a[i] (elements a (i+1) j))
+
+lemma Elements_remove_last: forall a:array 'a, i j :int.
+      i < j-1 ->
+      (elements a i (j-1)) = diff (elements a i j) (singleton a[j-1])
+
+lemma Occ_elements: forall a:array 'a, i j n:int.
+       i <= j < n ->
+         nb_occ a[j] (elements a i n) > 0
+
+let rec lemma elements_set_outside (a:array 'a) (i j:int)
+  requires { i <= j }
+  variant { j - i }
+  ensures { forall k : int. (k < i || k >= j) ->
+            forall e:'a. (elements (a[k <- e]) i j) = (elements a i j) }
+= if j > i then elements_set_outside a i (j-1)
+
+lemma Elements_set_inside : forall a:array 'a, i j n: int, e:'a, b:bag 'a.
+       i <= j < n ->
+       (elements a i n) = add a[j] b ->
+       (elements (a[j <- e]) i n) = add e b
+
+lemma Elements_set_inside2 : forall a:array 'a, i j n: int, e:'a.
+       i <= j < n ->
+       elements a[j <- e] i n =
+          add e (diff (elements a i n) (singleton (a[j])))
+
+end
+
+(*
+Local Variables:
+compile-command: "why3ide -I . elements"
+End:
+*)

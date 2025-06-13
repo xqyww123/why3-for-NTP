@@ -1,0 +1,124 @@
+[jessie3] Loading Why3 configuration...
+[jessie3] Why3 environment loaded.
+[jessie3] Loading Why3 theories...
+[jessie3] Loading Why3 modules...
+[kernel] Parsing FRAMAC_SHARE/libc/__fc_builtin_for_normalization.i (no preprocessing)
+[kernel] Parsing tests/basic/axiomatic.c (with preprocessing)
+[jessie3] Loading prover drivers...
+[jessie3] Translating to Why3...
+[jessie3] Starting translation
+[jessie3] found 1 logic decl(s)
+[jessie3] made 3 theory(ies)
+[jessie3] made 0 function(s)
+[jessie3] Running provers...
+[jessie3] running theory 1:
+[jessie3] theory Global_logic_declarations
+            (* use why3.BuiltIn.BuiltIn *)
+            
+            (* use why3.Bool.Bool *)
+            
+            (* use why3.Unit.Unit *)
+            
+            (* use int.Int *)
+            
+            (* use int.ComputerDivision *)
+            
+            (* use real.Real *)
+            
+            (* use array.Array *)
+            
+            function f1 (x:int) : int = (x * x) + 1
+            
+            lemma l1 : forall x:int. f1 x >= 1
+            end
+[jessie3] Provers: Alt-Ergo 1.01, CVC4 1.4, Z3 4.4.1
+[jessie3] Task 1 (l1) (): Valid, Unknown, Valid
+[jessie3] running theory 1:
+[jessie3] theory BagInt
+            (* use why3.BuiltIn.BuiltIn *)
+            
+            (* use why3.Bool.Bool *)
+            
+            (* use why3.Unit.Unit *)
+            
+            (* use int.Int *)
+            
+            (* use int.ComputerDivision *)
+            
+            (* use real.Real *)
+            
+            (* use array.Array *)
+            
+            (* use Global_logic_declarations *)
+            
+            type bag
+            
+            function occ int bag : int
+            
+            axiom extensionality :
+              forall b1:bag, b2:bag. (forall x:int. occ x b1 = occ x b2) -> b1 = b2
+            
+            function singleton int : bag
+            
+            axiom occ_singleton_eq : forall x:int. occ x (singleton x) = 1
+            
+            axiom occ_singleton_neq :
+              forall x:int, y:int. not x = y -> occ x (singleton y) = 0
+            
+            function bag_union bag bag : bag
+            
+            axiom occ_union :
+              forall x:int, b1:bag, b2:bag.
+               occ x (bag_union b1 b2) = (occ x b1 + occ x b2)
+            
+            lemma l2 : f1 1 = 2
+            end
+[jessie3] Provers: Alt-Ergo 1.01, CVC4 1.4, Z3 4.4.1
+[jessie3] Task 1 (l2) (): Valid, Valid, Valid
+[jessie3] running theory 1:
+[jessie3] theory Global_logic_declarations1
+            (* use why3.BuiltIn.BuiltIn *)
+            
+            (* use why3.Bool.Bool *)
+            
+            (* use why3.Unit.Unit *)
+            
+            (* use int.Int *)
+            
+            (* use int.ComputerDivision *)
+            
+            (* use real.Real *)
+            
+            (* use array.Array *)
+            
+            (* use BagInt *)
+            
+            lemma union_comm : forall b1:bag, b2:bag. bag_union b1 b2 = bag_union b2 b1
+            end
+[jessie3] Provers: Alt-Ergo 1.01, CVC4 1.4, Z3 4.4.1
+[jessie3] Task 1 (union_comm) (): Unknown, Unknown, Timeout
+[jessie3] running theory 1:
+[jessie3] theory C_Functions
+            (* use why3.BuiltIn.BuiltIn *)
+            
+            (* use why3.Bool.Bool *)
+            
+            (* use why3.Unit.Unit *)
+            
+            (* use int.Int *)
+            
+            (* use int.ComputerDivision *)
+            
+            (* use real.Real *)
+            
+            (* use array.Array *)
+            
+            (* use Global_logic_declarations1 *)
+            
+            (* use ref.Ref *)
+            
+            (* use mach.bv.BVCheck32 *)
+            
+            (* use mach.int.Int64 *)
+            end
+[jessie3] Provers: Alt-Ergo 1.01, CVC4 1.4, Z3 4.4.1

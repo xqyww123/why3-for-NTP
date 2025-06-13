@@ -1,0 +1,27 @@
+module Type_Map
+   type poly_map 'a 'b
+   meta "encoding:ignore_polymorphism_ts" type poly_map
+end
+
+module N
+use Type_Map
+type t
+type c
+type u = poly_map t c
+
+function get (a : u) (i : t) : c
+
+function to_array u : t -> c
+meta "model_projection" function to_array
+axiom to_array_get : forall x:u, i:t. to_array x i = get x i
+
+function set (a : u) (i : t) (v : c) : u
+
+end
+
+module G
+use int.Int
+clone export N with type t = int, type c = int
+let g2 (x: u) : unit =
+  assert {get x 13 < 41}
+end

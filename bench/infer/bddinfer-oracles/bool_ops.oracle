@@ -1,0 +1,14 @@
+Invariant for loop [anonymous_loop_0] is
+  ((((if !a = True then !z = True /\ !y = True /\ !x = True
+      else !z = False /\ (!y = False \/ !x = False)) /\
+     o = True) /\
+    o1 = True) /\
+   o2 = True) /\
+  o3 = True
+Domains for loop [anonymous_loop_0] are
+  o3 = true; x = top; o2 = true; y = top; o1 = true; z = top; o = true;
+    a = top
+File bench/infer/bool_ops.mlw:
+Goal f'vc.
+Prover result is: Valid (0.00s, 8 steps).
+

@@ -1,0 +1,8 @@
+theory A
+  type t
+end
+
+theory B
+  clone A
+  type t
+end

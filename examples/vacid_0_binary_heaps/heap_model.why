@@ -1,0 +1,34 @@
+theory Model
+
+use int.Int
+(*use map.Map*)
+
+use bag.Bag
+use elements.Elements
+use heap.Heap
+
+function model (h:logic_heap): (bag int) =
+   let (a,n) = h in elements a.A.contents 0 n
+
+lemma Model_empty :
+   forall a: map. model (a,0) = empty_bag
+
+lemma Model_singleton : forall a: map. model (a,1) = singleton(A.([]) a 0)
+
+lemma Model_set :
+  forall a: map, v: int, i n: int.
+    0 <= i < n ->
+        add (A.([]) a i) (model (A.([<-]) a i v, n)) =
+        add v (model (a, n))
+
+lemma Model_add_last:
+ forall a: map, n: int. n >= 0 ->
+   model (a, n+1) = add (A.([]) a n) (model (a, n))
+
+end
+
+(*
+Local Variables:
+compile-command: "why3ide -I . heap_model.why"
+End:
+*)

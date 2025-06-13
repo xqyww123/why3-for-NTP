@@ -1,0 +1,1352 @@
+####################################################################
+#                                                                  #
+#  The Why3 Verification Platform   /   The Why3 Development Team  #
+#  Copyright 2010-2024 --  Inria - CNRS - Paris-Saclay University  #
+#                                                                  #
+#  This software is distributed under the terms of the GNU Lesser  #
+#  General Public License version 2.1, with the special exception  #
+#  on linking described in file LICENSE.                           #
+#                                                                  #
+####################################################################
+
+AC_INIT([Why3], [1.8.0])
+
+# verbosemake
+
+AC_ARG_ENABLE(verbose-make,
+    AS_HELP_STRING([--enable-verbose-make], [verbose makefile recipes]),,
+    enable_verbose_make=no)
+
+# LOCAL_CONF
+
+AC_ARG_ENABLE(local,
+    AS_HELP_STRING([--enable-local], [use Why3 in the build directory (no installation)]),,
+    enable_local=no)
+
+# RELOCATABLE INSTALLATION
+
+AC_ARG_ENABLE(relocation,
+    AS_HELP_STRING([--enable-relocation], [allow for later relocation of Why3 installation]),,
+    enable_relocation=no)
+
+# NATIVE
+
+AC_ARG_ENABLE(native-code,
+    AS_HELP_STRING([--disable-native-code], [use only the byte-code compiler]),,
+    enable_native_code=yes)
+
+# WHY3LIB
+
+AC_ARG_ENABLE(why3-lib,
+    AS_HELP_STRING([--disable-why3-lib], [use an already installed Why3]),,
+    enable_why3_lib=yes)
+
+# ocamlfind
+
+AC_ARG_ENABLE(ocamlfind,
+    AS_HELP_STRING([--disable-ocamlfind], [do not use Ocamlfind]),,
+    enable_ocamlfind=check)
+
+# camlzip
+
+AC_ARG_ENABLE(zip,
+    AS_HELP_STRING([--disable-zip], [do not use LZ compression to store session files]),,
+    enable_zip=check)
+
+# infer
+
+AC_ARG_ENABLE(infer,
+    AS_HELP_STRING([--enable-infer], [use apron and fixpoint to infer loop invariants]),,
+    enable_infer=no)
+
+# bddinfer
+
+AC_ARG_ENABLE(bddinfer,
+    AS_HELP_STRING([--enable-bddinfer], [use apron and BDDs to infer loop invariants]),,
+    enable_bddinfer=no)
+
+# js_of_ocaml
+
+AC_ARG_ENABLE(js_of_ocaml,
+    AS_HELP_STRING([--disable-js-of-ocaml], [do not use js-of-ocaml]),,
+    enable_js_of_ocaml=check)
+
+# re
+
+AC_ARG_ENABLE(re,
+    AS_HELP_STRING([--disable-re], [use Str instead of Re for regular expressions]),,
+    enable_re=check)
+
+# sexp
+
+AC_ARG_ENABLE(sexp,
+    AS_HELP_STRING([--disable-sexp], [disable S-expression support for `Ptree` and `why3 pp`]),,
+    enable_sexp=yes)
+
+# IDE
+
+AC_ARG_ENABLE(ide,
+    AS_HELP_STRING([--disable-ide], [do not build Why3 IDE]),,
+    enable_ide=check)
+
+AC_ARG_ENABLE(web_ide,
+    AS_HELP_STRING([--disable-web-ide], [do not build Why3 Web IDE]),,
+    enable_web_ide=check)
+
+# Coq libraries
+
+AC_ARG_ENABLE(coq-libs,
+    AS_HELP_STRING([--disable-coq-libs], [do not build Coq realizations]),,
+    enable_coq_libs=check)
+
+# PVS libraries
+
+AC_ARG_ENABLE(pvs-libs,
+    AS_HELP_STRING([--disable-pvs-libs], [do not build PVS realizations]),,
+    enable_pvs_libs=yes)
+
+# Isabelle libraries
+
+AC_ARG_ENABLE(isabelle-libs,
+    AS_HELP_STRING([--disable-isabelle-libs], [do not build Isabelle realizations]),,
+    enable_isabelle_libs=yes)
+
+# MLMPFR
+
+AC_ARG_ENABLE(mpfr,
+    AS_HELP_STRING([--disable-mpfr], [disable support for MPFR]),,
+    enable_mpfr=check)
+
+# hypothesis selection
+
+AC_ARG_ENABLE(hypothesis-selection,
+    AS_HELP_STRING([--disable-hypothesis-selection], [do not support hypothesis selection]),,
+    enable_hypothesis_selection=check)
+
+# stackify
+
+AC_ARG_ENABLE(stackify,
+    AS_HELP_STRING([--disable-stackify], [disable structure reconstruction algorithm for MLCFG]),,
+    enable_stackify=check)
+
+# documentation
+
+AC_ARG_ENABLE(doc,
+    AS_HELP_STRING([--disable-doc], [do not build documentation]),,
+    enable_doc=yes)
+
+AC_ARG_ENABLE(html-pdf,
+    AS_HELP_STRING([--disable-pdf-doc], [do not build PDF documentation]),,
+    enable_pdf_doc=yes)
+
+# Experimental Jessie3 Frama-C plugin, disabled by default
+
+AC_ARG_ENABLE(frama-c,
+    AS_HELP_STRING([--enable-frama-c], [enable Frama-C plugin]),,
+    [enable_frama_c=no
+     reason_frama_c=" (disabled by default)"])
+
+# profiling with statememprof
+
+AC_ARG_ENABLE(statmemprof,
+    AS_HELP_STRING([--enable-statmemprof], [enable statistical memory profiling]),,
+    [enable_statmemprof=no
+     reason_statmemprof=" (disabled by default)"])
+
+# Emacs compilation
+
+AC_ARG_ENABLE(emacs-compilation,
+    AS_HELP_STRING([--disable-emacs-compilation], [do not compile why3.elc]),,
+    enable_emacs_compilation=yes)
+
+# default editor
+
+AC_ARG_VAR(EDITOR, [default editor])
+
+# Java look-up
+AC_ARG_ENABLE(java,
+    AS_HELP_STRING([--disable-java], [do not use java in bench]),
+    [enable_java=${enableval}],
+    [enable_java=yes])
+
+
+# either relocation or local, not both
+if test "$enable_relocation" = yes -a "$enable_local" = yes ; then
+   AC_MSG_ERROR([cannot use --enable-relocation and --enable-local at the same time.])
+fi
+
+# Check for arch/OS
+
+AC_MSG_CHECKING([executable suffix])
+if uname -s | grep -q CYGWIN ; then
+  EXE=.exe
+  STRIP='echo "no strip "'
+  BUILD_ENV_TYPE=Cygwin
+  AC_MSG_RESULT([.exe <Cygwin>])
+elif uname -s | grep -q MINGW ; then
+  EXE=.exe
+  STRIP=strip
+  BUILD_ENV_TYPE=MinGW
+  AC_MSG_RESULT([.exe <MinGW>])
+else
+  EXE=
+  STRIP=strip
+  BUILD_ENV_TYPE=Posix
+  AC_MSG_RESULT([<none>])
+fi
+
+# Check for ocamlc, as we need it to find the C compiler to use
+# we first look for it in the path; if not present, we fail
+AC_CHECK_PROG(OCAMLC,ocamlc,ocamlc,no)
+if test "$OCAMLC" = no ; then
+   AC_MSG_ERROR([cannot find ocamlc.])
+fi
+AC_MSG_CHECKING([ocaml os type])
+OCAML_OS_TYPE=$(OCAMLC -config-var os_type)
+AC_MSG_RESULT([$OCAML_OS_TYPE])
+
+AC_PROG_CC([ $(OCAMLC -config-var c_compiler) gcc cl.exe clang ])
+AC_PROG_MKDIR_P
+AC_PROG_INSTALL
+
+AC_DEFUN([AX_VERSION_GE], [AS_VERSION_COMPARE([$1],[$2],[$4],[$3],[$3])])
+
+# Check for the rest of Ocaml compilers
+
+# we extract Ocaml version number
+OCAMLVERSION=`$OCAMLC -v | sed -n -e 's|.*version *\(.*\)$|\1|p'`
+AC_MSG_NOTICE([ocaml version is $OCAMLVERSION])
+
+AX_VERSION_GE([$OCAMLVERSION], 4.08.0, [],
+  [AC_MSG_ERROR([You need Objective Caml 4.08.0 or higher.])])
+
+# Ocaml library path
+# old way: OCAMLLIB=`$OCAMLC -v | tail -1 | cut -f 4 -d ' ' | tr -d '\\r'`
+OCAMLLIB=$($OCAMLC -where | tr -d '\r' | tr '\\' '/')
+AC_MSG_NOTICE([ocaml library path is $OCAMLLIB])
+
+# then we look for ocamlopt; if not present, we issue a warning
+# if the version is not the same, we also discard it
+# we set OCAMLBEST to "opt" or "byte", whether ocamlopt is available or not
+AC_CHECK_PROG(OCAMLOPT,ocamlopt,ocamlopt,no)
+OCAMLBEST=byte
+if test "$OCAMLOPT" = no ; then
+   AC_MSG_WARN([cannot find ocamlopt; bytecode compilation only.])
+else
+        AC_MSG_CHECKING([ocamlopt version])
+	TMPVERSION=`$OCAMLOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p'`
+	if test "$TMPVERSION" != "$OCAMLVERSION" ; then
+	    AC_MSG_RESULT([differs from ocamlc; ocamlopt discarded.])
+	    OCAMLOPT=no
+	else
+	    AC_MSG_RESULT(ok)
+	    OCAMLBEST=opt
+	fi
+fi
+
+# checking for native-code
+if test "$enable_native_code" != yes || test "$OCAMLBEST" = byte ; then
+    enable_native_code=no
+    OCAMLBEST=byte
+    OCAMLOPT=no
+fi
+
+# checking for ocamlc.opt
+AC_CHECK_PROG(OCAMLCDOTOPT,ocamlc.opt,ocamlc.opt,no)
+if test "$OCAMLCDOTOPT" != no ; then
+   AC_MSG_CHECKING([ocamlc.opt version])
+	TMPVERSION=`$OCAMLCDOTOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p'`
+	if test "$TMPVERSION" != "$OCAMLVERSION" ; then
+	    AC_MSG_RESULT([differs from ocamlc; ocamlc.opt discarded.])
+	else
+	    AC_MSG_RESULT(ok)
+	    OCAMLC=$OCAMLCDOTOPT
+	fi
+fi
+
+# checking for ocamlopt.opt
+if test "$OCAMLOPT" != no ; then
+    AC_CHECK_PROG(OCAMLOPTDOTOPT,ocamlopt.opt,ocamlopt.opt,no)
+    if test "$OCAMLOPTDOTOPT" != no ; then
+	AC_MSG_CHECKING([ocamlc.opt version])
+	TMPVER=`$OCAMLOPTDOTOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p'`
+	if test "$TMPVER" != "$OCAMLVERSION" ; then
+	    AC_MSG_RESULT([differs from ocamlc; ocamlopt.opt discarded.])
+	else
+	    AC_MSG_RESULT(ok)
+	    OCAMLOPT=$OCAMLOPTDOTOPT
+	fi
+    fi
+fi
+
+# ocamldep, ocamllex and ocamlyacc should also be present in the path
+AC_CHECK_PROG(OCAMLDEP,ocamldep,ocamldep,no)
+if test "$OCAMLDEP" = no ; then
+   AC_MSG_ERROR([cannot find ocamldep.])
+else
+   AC_CHECK_PROG(OCAMLDEPDOTOPT,ocamldep.opt,ocamldep.opt,no)
+   if test "$OCAMLDEPDOTOPT" != no ; then
+      OCAMLDEP=$OCAMLDEPDOTOPT
+   fi
+fi
+
+AC_CHECK_PROG(OCAMLLEX,ocamllex,ocamllex,no)
+if test "$OCAMLLEX" = no ; then
+   AC_MSG_ERROR([cannot find ocamllex.])
+else
+    AC_CHECK_PROG(OCAMLLEXDOTOPT,ocamllex.opt,ocamllex.opt,no)
+    if test "$OCAMLLEXDOTOPT" != no ; then
+	OCAMLLEX=$OCAMLLEXDOTOPT
+    fi
+fi
+
+AC_CHECK_PROG(OCAMLYACC,ocamlyacc,ocamlyacc,no)
+if test "$OCAMLYACC" = no ; then
+   AC_MSG_ERROR([cannot find ocamlyacc.])
+fi
+
+AC_CHECK_PROG(OCAMLDOC,ocamldoc,ocamldoc,true)
+if test "$OCAMLDOC" != true ; then
+    AC_CHECK_PROG(OCAMLDOCOPT,ocamldoc.opt,ocamldoc.opt,no)
+    if test "$OCAMLDOCOPT" != no ; then
+	OCAMLDOC=$OCAMLDOCOPT
+    fi
+fi
+
+AC_CHECK_PROG(MENHIR,menhir,menhir,no)
+if test "$MENHIR" = no ; then
+   AC_MSG_ERROR([cannot find menhir.])
+fi
+
+MENHIRVERSION=`$MENHIR --version | sed -n -e 's,.*version *\(.*\)$,\1,p'`
+AX_VERSION_GE([$MENHIRVERSION], 20170418, [],
+  [AC_MSG_ERROR([You need Menhir 20170418 or higher.])])
+
+found_ocamlfind=no
+if test "$enable_ocamlfind" != no; then
+   AC_CHECK_PROG(OCAMLFIND,ocamlfind,ocamlfind,no)
+   if test "$OCAMLFIND" = no; then
+      reason_ocamlfind=" (not found)"
+   else
+      OCAMLFINDLIB=$(ocamlfind printconf stdlib | tr -d '\r' | tr '\\' '/')
+      if test "$OCAMLFINDLIB" != "$OCAMLLIB"; then
+         found_ocamlfind=no
+         reason_ocamlfind=" (incompatible with OCaml)"
+         echo "but your ocamlfind is not compatible with your ocamlc:"
+         echo "ocamlfind: $OCAMLFINDLIB, ocamlc: $OCAMLLIB"
+      else
+         found_ocamlfind=yes
+      fi
+   fi
+fi
+
+if test "$found_ocamlfind" = no; then
+   if test "$enable_ocamlfind" = yes; then
+      AC_MSG_ERROR([cannot use ocamlfind.])
+   fi
+   enable_ocamlfind=no
+fi
+
+if test "$enable_ocamlfind" != no; then
+   #if ocamlfind is used it gives the install path for ocaml library
+   OCAMLINSTALLLIB=$($OCAMLFIND printconf destdir | tr -d '\r' | tr '\\' '/')
+   enable_ocamlfind=yes
+else
+   OCAMLINSTALLLIB=$OCAMLLIB
+   OCAMLFIND=no
+fi
+
+if test "$enable_why3_lib" = yes ; then
+   WHY3LIB=
+else
+   if test "$enable_ocamlfind" = no; then
+      AC_MSG_ERROR([cannot use --disable-why3-lib without ocamlfind.])
+   fi
+   WHY3LIB=why3
+   AC_MSG_CHECKING([for Why3 using ocamlfind])
+   DIR=$($OCAMLFIND query why3 2> /dev/null | tr -d '\r')
+   if test -n "$DIR"; then
+      AC_MSG_RESULT([yes])
+      WHY3INCLUDE="-I $DIR"
+   else
+      AC_MSG_RESULT([no])
+      AC_MSG_ERROR([cannot use --disable-why3-lib without an installed Why3.])
+   fi
+fi
+
+if test "$enable_local" = no; then
+   LOCALDIR=''
+else
+   if test "$OCAML_OS_TYPE" = Win32 -a "$BUILD_ENV_TYPE" = Cygwin; then
+      LOCALDIR="$(cygpath -m "$PWD" | tr -d '\r')"
+   else
+      LOCALDIR="$PWD"
+   fi
+fi
+
+# ppx
+if test "$enable_ocamlfind" = yes; then
+  AC_MSG_CHECKING([for compiler-libs using ocamlfind])
+  COMPILERLIBS=$($OCAMLFIND query compiler-libs 2> /dev/null | tr -d '\r')
+  if test -n "$COMPILERLIBS"; then
+    AC_MSG_RESULT([yes])
+    enable_ppx=yes
+  else
+    AC_MSG_RESULT([no])
+    enable_ppx=no
+    reason_ppx=" (compiler-libs not found)"
+  fi
+else
+  enable_ppx=no
+fi
+
+# checking for sphinx
+if test "$enable_doc" = yes; then
+   AC_CHECK_PROG(SPHINX,sphinx-build,sphinx-build,no)
+   if test "$SPHINX" = no; then
+      enable_doc=no
+      enable_pdf_doc=no
+      reason_doc=" (sphinx-build not found)"
+      AC_MSG_WARN([cannot find sphinx-build, documentation disabled.])
+   fi
+else
+   enable_pdf_doc=no
+fi
+
+# checking for rubber or latexmk or pdflatex
+if test "$enable_pdf_doc" = yes; then
+   AC_CHECK_PROGS(LATEX,latexmk rubber pdflatex,no)
+   if test "$LATEX" = no; then
+      enable_pdf_doc=no
+      reason_pdf_doc=" ((rubber|latexmk|pdflatex) not found)"
+      AC_MSG_WARN([cannot find any latex compiler, PDF documentation disabled.])
+   fi
+fi
+
+# checking for emacs
+if test "$enable_emacs_compilation" = yes ; then
+   AC_CHECK_PROG(EMACS,emacs,emacs,no)
+   if test "$EMACS" = no ; then
+      enable_emacs_compilation=no
+      AC_MSG_WARN([cannot find emacs, compilation of why3.elc disabled.])
+   fi
+fi
+
+# checking for Zarith
+DIR=
+found_zarith=yes
+if test "$enable_ocamlfind" = yes; then
+   AC_MSG_CHECKING([for zarith using ocamlfind])
+   DIR=$($OCAMLFIND query zarith 2> /dev/null | tr -d '\r')
+   if test -n "$DIR"; then
+      AC_MSG_RESULT([yes])
+      BIGINTINCLUDE="-I $DIR"
+   else
+      AC_MSG_RESULT([no])
+      found_zarith=no
+   fi
+else
+   BIGINTINCLUDE="-I +zarith"
+   DIR="$OCAMLLIB/zarith"
+   AC_CHECK_FILE($DIR/zarith.cma,,found_zarith=no)
+fi
+if test -n "$DIR"; then
+   AC_CHECK_FILE($DIR/z.cmi,,found_zarith=no)
+fi
+if test "$found_zarith" = no; then
+   AC_MSG_ERROR([cannot find library zarith.])
+fi
+
+# checking for apron for bddinfer
+if test "$enable_bddinfer" = yes; then
+   if test "$enable_ocamlfind" = yes; then
+      # gmp is a dependency of apron
+      INFERINCLUDE=$($OCAMLFIND query -separator ' ' -i-format apron 2> /dev/null | tr -d '\r')
+   fi
+   if test -n "$INFERINCLUDE"; then
+      echo "ocamlfind found apron in $INFERINCLUDE"
+      INFERLIB="apron"
+      INFERPKG="zarith apron apron.polkaMPQ"
+   else
+      enable_bddinfer=no
+      reason_bddinfer=" (apron not found)"
+      AC_MSG_WARN([Lib apron not found, bddinfer will not be built.])
+   fi
+else
+  reason_bddinfer=" (disabled by default)"
+fi
+
+# checking for apron and fixpoint
+if test "$enable_infer" = yes; then
+   if test "$enable_ocamlfind" = yes; then
+      # gmp is a dependency of apron
+      INFERINCLUDE=$($OCAMLFIND query apron camllib 2> /dev/null | tr -d '\r')
+   fi
+   if test -n "$INFERINCLUDE"; then
+      echo "ocamlfind found apron, camllib in $INFERINCLUDE"
+      INFERINCLUDE=$($OCAMLFIND query fixpoint 2> /dev/null | tr -d '\r')
+      if test -n "$INFERINCLUDE"; then
+         echo "ocamlfind found fixpoint in $INFERINCLUDE"
+         INFERINCLUDE="$($OCAMLFIND query -separator ' ' -i-format apron fixpoint camllib gmp 2> /dev/null | tr -d '\r')"
+         INFERLIB="apron fixpoint"
+         INFERPKG="apron fixpoint apron.boxMPQ apron.octMPQ apron.polkaMPQ"
+      else
+         enable_infer=no
+         AC_MSG_WARN([Lib fixpoint not found, infer will not be built.])
+         reason_infer=" (fixpoint not found)"
+      fi
+   else
+      enable_infer=no
+      reason_infer=" (apron or camllib not found)"
+      AC_MSG_WARN([Lib apron or camllib not found, infer will not be built.])
+   fi
+else
+  reason_infer=" (disabled by default)"
+fi
+
+# checking for camlzip
+if test "$enable_zip" = no; then
+   reason_zip=" (disabled by user)"
+else
+   DIR=
+   found_zip=yes
+   if test "$enable_ocamlfind" = yes; then
+      AC_MSG_CHECKING([for camlzip using ocamlfind])
+      DIR=$($OCAMLFIND query zip 2> /dev/null | tr -d '\r')
+      if test -n "$DIR"; then
+         AC_MSG_RESULT([yes])
+         ZIPINCLUDE="-I $DIR"
+      else
+         AC_MSG_RESULT([no])
+         found_zip=no
+      fi
+   else
+      ZIPINCLUDE="-I +zip"
+      DIR="$OCAMLLIB/zip"
+      AC_CHECK_FILE($DIR/zip.cma,,found_zip=no)
+   fi
+   if test -n "$DIR"; then
+      AC_CHECK_FILE($DIR/zip.cmi,,found_zip=no)
+   fi
+   if test "$found_zip" = no; then
+      if test "$enable_zip" = yes; then
+         AC_MSG_ERROR([cannot find library camlzip.])
+      fi
+      AC_MSG_WARN([cannot find library camlzip; sessions files will not be compressed.])
+      enable_zip=no
+      reason_zip=" (camlzip not found)"
+   fi
+fi
+
+if test "$enable_zip" != no; then
+   ZIPLIB=zip
+   enable_zip=yes
+else
+   ZIPLIB=
+   ZIPINCLUDE=
+fi
+
+# checking for menhirlib
+found_menhirlib=yes
+DIR=
+if test "$enable_ocamlfind" = yes; then
+   AC_MSG_CHECKING([for menhirLib using ocamlfind])
+   DIR=$($OCAMLFIND query menhirLib 2> /dev/null | tr -d '\r')
+   if test -n "$DIR"; then
+      AC_MSG_RESULT([yes])
+      MENHIRINCLUDE="-I $DIR"
+   else
+      AC_MSG_RESULT([no])
+      found_menhirlib=no
+   fi
+else
+   MENHIRINCLUDE="-I +menhirLib"
+   DIR="$OCAMLLIB/menhirLib"
+   menhirlib_cmo=
+   AC_CHECK_FILE($DIR/menhirLib.cmo,menhirlib_cmo=yes,)
+   AC_CHECK_FILE($DIR/menhirLib.cma,menhirlib_cmo=no,)
+   if test -z "$menhirlib_cmo"; then found_menhirlib=no; fi
+fi
+if test -n "$DIR"; then
+   AC_CHECK_FILE($DIR/menhirLib.cmi,,found_menhirlib=no)
+fi
+if test "$found_menhirlib" = no; then
+   AC_MSG_ERROR([cannot find library menhirLib.])
+fi
+AC_SUBST(menhirlib_cmo)
+
+# checking for re
+if test "$enable_re" = no; then
+   reason_re=" (disabled by user)"
+else
+   found_re=yes
+   DIR=
+   if test "$enable_ocamlfind" = yes; then
+      AC_MSG_CHECKING([for re using ocamlfind])
+      DIR=$($OCAMLFIND query re 2> /dev/null | tr -d '\r')
+      if test -n "$DIR"; then
+         AC_MSG_RESULT([yes])
+         REINCLUDE="-I $DIR"
+      else
+         AC_MSG_RESULT([no])
+         found_re=no
+      fi
+   else
+      REINCLUDE="-I +re"
+      DIR="$OCAMLLIB/re"
+      AC_CHECK_FILE($DIR/re.cmx,,found_re=no)
+   fi
+   if test -n "$DIR"; then
+      AC_CHECK_FILE($DIR/re.cmi,,found_re=no)
+   fi
+   if test "$found_re" = no; then
+      if test "$enable_re" = yes; then
+         AC_MSG_ERROR([cannot find library re.])
+      fi
+      AC_MSG_WARN([cannot find library re, using Str instead.])
+      enable_re=no
+      reason_re=" (re not found)"
+   fi
+fi
+
+if test "$enable_re" != no; then
+   RELIB=re
+   enable_re=yes
+else
+   REINCLUDE=
+   RELIB=str
+fi
+
+# checking for lablgtk3
+if test "$enable_ide" = no ; then
+   reason_ide=" (disabled by user)"
+fi
+if test "$enable_ide" != no -a "$enable_ocamlfind" = no; then
+   if test "$enable_ide" = yes; then
+      AC_MSG_ERROR([cannot build IDE without ocamlfind.])
+   fi
+   enable_ide=no
+   reason_ide=" (ocamlfind not available)"
+fi
+
+found_lablgtk=no
+if test "$enable_ide" != no; then
+   AC_MSG_CHECKING([for lablgtk3 using ocamlfind])
+   DIR=$($OCAMLFIND query lablgtk3 2> /dev/null | tr -d '\r')
+   if test -n "$DIR"; then
+      AC_MSG_RESULT([yes])
+      found_lablgtk=yes
+      AC_CHECK_FILE($DIR/gtkButton.cmi,,found_lablgtk=no)
+   else
+      AC_MSG_RESULT([no])
+      found_lablgtk=no
+   fi
+   if test "$found_lablgtk" = yes; then
+      GTKVERSION=3
+      PKGS_SOURCEVIEW="lablgtk3-sourceview3 lablgtk3.sourceview3 lablgtksourceview3"
+   fi
+fi
+
+# checking for lablgtksourceview
+found_lablgtksourceview=no
+if test "$found_lablgtk" = yes; then
+   for p in $PKGS_SOURCEVIEW; do
+      AC_MSG_CHECKING([for $p using ocamlfind])
+      DIR=$($OCAMLFIND query $p 2> /dev/null | tr -d '\r')
+      if test -n "$DIR"; then
+         AC_MSG_RESULT([yes])
+         AC_CHECK_FILE($DIR/gSourceView$GTKVERSION.cmi,,p=)
+         if test -n "$p"; then
+            PKG_SOURCEVIEW=$p
+            break
+         fi
+      else
+         AC_MSG_RESULT([no])
+      fi
+   done
+   if test -n "$PKG_SOURCEVIEW"; then
+      found_lablgtksourceview=yes
+   fi
+fi
+
+if test "$enable_ide" != no -a "$found_lablgtk" = no; then
+   if test "$enable_ide" = yes; then
+      AC_MSG_ERROR([cannot build IDE without lablgtk3.])
+   fi
+   AC_MSG_WARN([cannot find library lablgtk3, IDE disabled.])
+   enable_ide=no
+   reason_ide=" (lablgtk3 not found)"
+fi
+
+if test "$enable_ide" != no -a "$found_lablgtksourceview" = no; then
+   if test "$enable_ide" = yes; then
+      AC_MSG_ERROR([cannot build IDE without lablgtksourceview.])
+   fi
+   AC_MSG_WARN([cannot find library lablgtksourceview, IDE disabled.])
+   enable_ide=no
+   reason_ide=" (lablgtksourceview not found)"
+fi
+
+if test "$enable_ide" != no; then
+   enable_ide=yes
+   LABLGTKPKG="lablgtk$GTKVERSION $PKG_SOURCEVIEW"
+fi
+
+if test "$enable_hypothesis_selection" != no -o "$enable_stackify" != no; then
+   found_ocamlgraph=yes
+   DIR=
+   if test "$enable_ocamlfind" = yes; then
+      AC_MSG_CHECKING([for ocamlgraph using ocamlfind])
+      DIR=$($OCAMLFIND query ocamlgraph 2> /dev/null | tr -d '\r')
+      if test -n "$DIR"; then
+         AC_MSG_RESULT([yes])
+         OCAMLGRAPHLIB="$DIR"
+      else
+         AC_MSG_RESULT([no])
+         found_ocamlgraph=no
+      fi
+   else
+      OCAMLGRAPHLIB="+ocamlgraph"
+      DIR="$OCAMLLIB/ocamlgraph"
+      AC_CHECK_FILE($DIR/graph.cma,,found_ocamlgraph=no)
+   fi
+   if test -n "$DIR"; then
+      AC_CHECK_FILE($DIR/graph.cmi,,found_ocamlgraph=no)
+   fi
+fi
+
+if test "$enable_hypothesis_selection" = no; then
+   reason_hypothesis_selection=" (disabled by user)"
+elif test "$found_ocamlgraph" = no; then
+   if test "$enable_hypothesis_selection" = yes; then
+      AC_MSG_ERROR([cannot enable hypothesis selection without ocamlgraph.])
+   fi
+   enable_hypothesis_selection=no
+   reason_hypothesis_selection=" (ocamlgraph not found)"
+   AC_MSG_WARN([cannot find library ocamlgraph, hypothesis selection disabled.])
+fi
+
+if test "$enable_hypothesis_selection" != no; then
+   META_OCAMLGRAPH="ocamlgraph"
+   enable_hypothesis_selection=yes
+else
+   META_OCAMLGRAPH=
+   OCAMLGRAPHLIB=
+fi
+
+if test "$enable_stackify" = no; then
+   reason_stackify=" (disabled by user)"
+elif test "$found_ocamlgraph" = no; then
+   if test "$enable_stackify" = yes; then
+      AC_MSG_ERROR([cannot enable stackify without ocamlgraph.])
+   fi
+   enable_stackify=no
+   reason_stackify=" (ocamlgraph not found)"
+   AC_MSG_WARN([cannot find library ocamlgraph, stackify disabled.])
+fi
+
+if test "$enable_stackify" != no; then
+   META_OCAMLGRAPH="ocamlgraph"
+   enable_stackify=yes
+else
+   META_OCAMLGRAPH=
+   OCAMLGRAPHLIB=
+fi
+
+# MLMPFR
+found_mlmpfr=no
+if test "$enable_mpfr" = no; then
+   reason_mpfr=" (disabled by user)"
+elif test "$enable_ocamlfind" != yes; then
+   reason_mpfr=" (ocamlfind not available)"
+elif test "$enable_js_of_ocaml" = yes -o "$enable_web_ide" = yes; then
+   if test "$enable_mpfr" = yes; then
+      AC_MSG_ERROR([cannot enable support for both MPFR and Javascript.])
+   fi
+   reason_mpfr=" (incompatible with js_of_ocaml) "
+else
+   found_mlmpfr=yes
+   AC_MSG_CHECKING([for mlmpfr])
+   DIR=$($OCAMLFIND query mlmpfr 2> /dev/null | tr -d '\r')
+   if test -n "$DIR"; then
+      AC_MSG_RESULT([yes])
+      old_mpfr=no
+      echo "ocamlfind found mlmpfr in $DIR"
+      # Test that MPFR version is higher than 4.0.0 (because of
+      # Faithful constructor incompatibility).
+      MPFRVERSION=$($OCAMLFIND query -format "%v" mlmpfr 2> /dev/null | tr -d '\r')
+      AX_VERSION_GE([$MPFRVERSION], 4.0.0, [], [
+         found_mlmpfr=no
+         reason_mpfr=" (mlmpfr >= 4.0.0 not found)"])
+      AC_CHECK_FILE($DIR/mpfr.cmi, [old_mpfr=yes], )
+      AC_CHECK_FILE($DIR/mlmpfr.cma,, [
+         found_mlmpfr=no
+         reason_mpfr=" (mlmpfr not found)"])
+   else
+      AC_MSG_RESULT([no])
+      reason_mpfr=" (mlmpfr not found)"
+      found_mlmpfr=no
+   fi
+fi
+
+if test "$enable_mpfr" != no -a "$found_mlmpfr" = no; then
+   if test "$enable_mpfr" = yes; then
+      AC_MSG_ERROR([cannot enable MPFR support without mlmpfr.])
+   fi
+   enable_mpfr=no
+fi
+
+if test "$enable_mpfr" != no; then
+   enable_mpfr=yes
+   MLMPFR=mlmpfr
+fi
+
+# checking for js_of_ocaml
+found_js_of_ocaml=no
+if test "$enable_js_of_ocaml" = no; then
+   reason_js_of_ocaml=" (disabled by user)"
+elif test "$enable_mpfr" = yes; then
+   reason_js_of_ocaml=" (incompatible with MPFR support)"
+elif test "$enable_ocamlfind" != yes; then
+   reason_js_of_ocaml=" (ocamlfind not available)"
+else
+   found_js_of_ocaml=yes
+   for p in js_of_ocaml js_of_ocaml-ppx zarith_stubs_js; do
+      AC_MSG_CHECKING([for $p])
+      DIR=$($OCAMLFIND query $p 2> /dev/null | tr -d '\r')
+      if test -z "$DIR"; then
+         AC_MSG_RESULT([no])
+         found_js_of_ocaml=no
+         reason_js_of_ocaml=" ($p not found)"
+         break
+      else
+         AC_MSG_RESULT([yes])
+      fi
+   done
+fi
+
+if test "$enable_js_of_ocaml" != no -a "$found_js_of_ocaml" = no; then
+   if test "$enable_js_of_ocaml" = yes; then
+      AC_MSG_ERROR([cannot enable Javascript support without ocamlfind.])
+   fi
+   enable_js_of_ocaml=no
+fi
+
+if test "$enable_js_of_ocaml" != no; then
+   JSOFOCAMLVERSION=$($OCAMLFIND query -format "%v" js_of_ocaml 2> /dev/null | tr -d '\r')
+   AX_VERSION_GE([$JSOFOCAMLVERSION], 5.6.0, [], [
+      found_js_of_ocaml=no
+      reason_js_of_ocaml=" (js_of_ocaml >= 5.6.0 not found)"])
+fi
+
+if test "$enable_js_of_ocaml" != no -a "$found_js_of_ocaml" = no; then
+   if test "$enable_js_of_ocaml" = yes; then
+      AC_MSG_ERROR([cannot enable Javascript support without js_of_ocaml >= 5.6.0 (found $JSOFOCAMLVERSION).])
+   fi
+   enable_js_of_ocaml=no
+fi
+
+if test "$enable_js_of_ocaml" != no; then
+   enable_js_of_ocaml=yes
+   JSOFOCAMLPKG="js_of_ocaml js_of_ocaml-ppx"
+fi
+
+# Web IDE
+if test "$enable_web_ide" = no; then
+   reason_web_ide=" (disabled by user)"
+elif test "$enable_js_of_ocaml" != yes; then
+   if test "$enable_web_ide" = yes; then
+      AC_MSG_ERROR([cannot enable web IDE without Javascript support.])
+   fi
+   enable_web_ide=no
+   reason_web_ide=" (Javascript support not available)"
+else
+   enable_web_ide=yes
+fi
+
+# checking for statmemprof
+if test "$enable_statmemprof" = yes; then
+   if test "$enable_ocamlfind" != yes; then
+      enable_statmemprof=no
+      reason_statmemprof=" (ocamlfind not available)"
+   else
+      DIR=$($OCAMLFIND query statmemprof-emacs 2> /dev/null | tr -d '\r')
+      if test -z "$DIR"; then
+         enable_statmemprof=no
+         reason_statmemprof=" (statmemprof-emacs not found)"
+      fi
+      STATMEMPROFPKG=statmemprof-emacs
+   fi
+fi
+
+# ppx_sexp_conv (only with ocamlfind)
+SEXPLIBPPX=
+SEXPLIB=
+if test "$enable_sexp" = no; then
+    reason_sexp=" (disabled by user)"
+else
+    if test "$enable_ocamlfind" != yes; then
+        enable_sexp=no
+        reason_sexp=" (ocamlfind not available)"
+    elif test "$enable_ppx" != yes; then
+        enable_sexp=no
+        reason_sexp=" (requires ppx)"
+    else
+        for p in ppx_sexp_conv sexplib ppx_deriving; do
+            AC_MSG_CHECKING([for $p using ocamlfind])
+            DIR=$($OCAMLFIND query $p 2> /dev/null | tr -d '\r')
+            if test -z "$DIR"; then
+               AC_MSG_RESULT([no])
+               enable_sexp=no
+               reason_sexp=" ($p not found)"
+               break
+            else
+               AC_MSG_RESULT([yes])
+            fi
+        done
+    fi
+    if test "$enable_sexp" = yes; then
+        SEXPLIBPPX="ppx_sexp_conv"
+        SEXPLIB="sexplib"
+    fi
+fi
+
+# Coq
+
+enable_coq_support=yes
+enable_coq_fp_libs=yes
+
+coq_compat_version=
+
+if test "$enable_coq_libs" = no; then
+   enable_coq_support=no
+   reason_coq_support=" (disabled by user)"
+fi
+
+if test "$enable_coq_support" = yes; then
+   AC_CHECK_PROG(COQC,coqc,coqc,no)
+   if test "$COQC" = no ; then
+      enable_coq_support=no
+      reason_coq_support=" (coqc not found)"
+   fi
+fi
+
+if test "$enable_coq_support" = yes; then
+   COQLIB=`$COQC -where | sed -e 's|\\\|/|g' -e 's| |\\ |g'`
+   AC_MSG_CHECKING(Coq version)
+   COQVERSION=[`$COQC -v | sed -n -e 's|.*version  *\([^ ]*\).*|\1|p'`]
+   AC_MSG_RESULT($COQVERSION)
+   COQNUMVERSION=[`echo $COQVERSION | awk -F. '{ printf("%d%02d\n", $1,$2); }'`]
+   if test "$COQNUMVERSION" -lt 816; then
+      if test "$enable_coq_libs" = yes; then
+         AC_MSG_ERROR([cannot build Coq libraries without Coq >= 8.16.])
+      fi
+      enable_coq_support=no
+      AC_MSG_WARN([cannot build Coq libraries without Coq >= 8.16.])
+      reason_coq_support=" (need version >= 8.16)"
+   else
+      if test "$COQNUMVERSION" -ge 817; then
+         COQFLAGS="-w deprecated-instance-without-locality,deprecated-hint-without-locality"
+      fi
+      if test "$COQNUMVERSION" -gt 820; then
+         AC_MSG_WARN([unrecognized Coq version, assuming Coq 8.20])
+         COQNUMVERSION=820
+      fi
+      coq_compat_version="COQ$COQNUMVERSION"
+   fi
+   if test "$enable_coq_fp_libs" = no; then
+      reason_coq_fp_libs= " (Coq < 8.11)"
+   fi
+fi
+
+if test "$enable_coq_support" = yes; then
+   AC_CHECK_PROG(COQDEP,coqdep,coqdep,no)
+   if test "$COQDEP" = no; then
+      if test "$enable_coq_libs" = yes; then
+         AC_MSG_ERROR([cannot build Coq libraries without Coqdep.])
+      fi
+      enable_coq_support=no
+      reason_coq_support=" (coqdep not found)"
+   fi
+fi
+
+if test "$enable_coq_support" = no; then
+   enable_coq_libs=no
+   enable_coq_fp_libs=no
+   COQVERSION=
+else
+   enable_coq_libs=yes
+fi
+
+if test "$enable_coq_fp_libs" = yes; then
+   AC_MSG_CHECKING([for Flocq])
+   AS_IF(
+     [ echo "Require Import Flocq.Version BinNat." \
+            "Goal (30400 <= Flocq_version)%N. easy. Qed." > conftest.v
+       "$COQC" conftest.v > conftest.err ],
+     [ AC_MSG_RESULT(yes) ],
+     [ AC_MSG_RESULT(no)
+       enable_coq_fp_libs=no
+       reason_coq_fp_libs=" (Flocq >= 3.4 not found)" ])
+   rm -f conftest.v conftest.vo conftest.err
+fi
+
+# PVS
+
+if test "$enable_pvs_libs" = no; then
+    enable_pvs_support=no
+    reason_pvs_support=" (disabled by user)"
+else
+    AC_CHECK_PROG(PVS,pvs,pvs,no)
+    if test "$PVS" = no ; then
+        enable_pvs_support=no
+        reason_pvs_support=" (pvs not found)"
+    elif $PVS --help 2> /dev/null | grep -q "physical volume"; then
+        AC_MSG_NOTICE([pvs does not seem to be the theorem prover])
+        enable_pvs_support=no
+        reason_pvs_support=" (pvs not found)"
+    else
+        PVSLIB=`$PVS -where`
+        AC_MSG_CHECKING(PVS version)
+        PVSVERSION=[`$PVS -version | sed -n -e 's|.*Version *\([^ ]*\)$|\1|p'`]
+        AC_MSG_RESULT($PVSVERSION)
+        case $PVSVERSION in
+          6.*|7.*)
+	        enable_pvs_support=yes
+                ;;
+          *)
+                enable_pvs_support=no
+	        AC_MSG_WARN([You need PVS 6.0 or higher; PVS discarded.])
+                reason_pvs_support=" (need version 6.0 or higher)"
+                ;;
+        esac
+    fi
+fi
+
+if test "$enable_pvs_support" = no; then
+   enable_pvs_libs=no
+   PVSVERSION=
+fi
+
+# Isabelle
+
+# Default version used for generation of realization in the case Isabelle is not
+# detected or Why3 is compiled with disable-isabelle.
+ISABELLEVERSION=2021-1
+
+if test "$enable_isabelle_libs" = no; then
+    enable_isabelle_support=no
+    reason_isabelle_support=" (disabled by user)"
+else
+    AC_CHECK_PROG(ISABELLE,isabelle,isabelle,no)
+    if test "$ISABELLE" = no ; then
+       enable_isabelle_support=no
+       reason_isabelle_support=" (isabelle not found)"
+    else
+        AC_MSG_CHECKING(Isabelle version)
+        ISABELLEDETECTEDVERSION=[`$ISABELLE version | sed -n -e 's|Isabelle\([^:]*\).*$|\1|p'`]
+        AC_MSG_RESULT($ISABELLEDETECTEDVERSION)
+        case $ISABELLEDETECTEDVERSION in
+          2019*)
+	        enable_isabelle_support=yes
+                ISABELLEVERSION=2019
+                ;;
+          2021-1*)
+	        enable_isabelle_support=yes
+                ISABELLEVERSION=2021-1
+                ;;
+          2022*)
+                enable_isabelle_support=yes
+                ISABELLEVERSION=2021-1
+                ;;
+          *)
+                enable_isabelle_support=no
+	        AC_MSG_WARN([You need Isabelle 2019 or later; Isabelle discarded.])
+                reason_isabelle_support=" (need version >= 2019)"
+                ;;
+        esac
+    fi
+fi
+
+if test "$enable_isabelle_support" = no; then
+   enable_isabelle_libs=no
+fi
+
+if test "$enable_pvs_libs" = yes; then
+   AC_MSG_CHECKING([for NASA PVS library])
+   enable_pvs_libs=no
+   reason_pvs_libs=" (no NASA PVS library in PVS_LIBRARY_PATH)"
+   for dir in  `echo $PVS_LIBRARY_PATH | tr ':' ' '`; do
+       if test -f $dir/nasalib-version; then
+          enable_pvs_libs=yes
+          reason_pvs_libs=""
+       fi
+   done
+   AC_MSG_RESULT($enable_pvs_libs)
+fi
+
+#check frama-c
+FRAMAC_SUPPORTED=Sulfur
+if test "$enable_frama_c" = yes ; then
+   AC_CHECK_PROG(FRAMAC,frama-c,frama-c,no)
+   if test "$FRAMAC" = no ; then
+        enable_frama_c="no"
+        reason_frama_c=" (frama-c not found)"
+   else
+      AC_MSG_CHECKING(Frama-C version)
+      FRAMAC_VERSION=`$FRAMAC -version | sed -n -e 's|\(Version: \)\?\(.*\)$|\2|p'`
+      AC_MSG_RESULT($FRAMAC_VERSION)
+      case $FRAMAC_VERSION in
+         $FRAMAC_SUPPORTED-*) ;;
+         *) AC_MSG_WARN(Version $FRAMAC_SUPPORTED required.)
+            enable_frama_c=no
+            reason_frama_c=" (version $FRAMAC_SUPPORTED required)"
+            ;;
+      esac
+   fi
+fi
+
+if test "$enable_frama_c" = yes; then
+   FRAMAC_SHARE=`$FRAMAC -print-path`
+   FRAMAC_LIBDIR=`$FRAMAC -print-libpath`
+   FRAMAC_INCLUDE="-I $FRAMAC_LIBDIR"
+fi
+
+VERSION=$PACKAGE_VERSION
+
+# default editor
+
+if test -z "$EDITOR"; then
+   case `uname -s` in
+   Darwin)
+      EDITOR=open
+      ;;
+   MINGW*)
+      EDITOR="cmd.exe -c start"
+      ;;
+   *)
+      EDITOR=xdg-open
+      ;;
+   esac
+fi
+
+# Check presence of java and javac used by whyml2java bench
+if test "$enable_java" = yes; then
+   AC_CHECK_PROG(JAVAC,javac,javac,no)
+   AC_CHECK_PROG(JAVA,java,java,no)
+else
+   JAVAC=no
+   JAVA=no
+fi
+
+# substitutions to perform
+AC_SUBST(VERSION)
+
+AC_SUBST(enable_verbose_make)
+
+AC_SUBST(EXE)
+AC_SUBST(STRIP)
+AC_SUBST(BUILD_ENV_TYPE)
+
+AC_SUBST(OCAMLC)
+AC_SUBST(OCAML_OS_TYPE)
+AC_SUBST(OCAMLOPT)
+AC_SUBST(OCAMLDEP)
+AC_SUBST(OCAMLLEX)
+AC_SUBST(OCAMLYACC)
+AC_SUBST(OCAMLDOC)
+AC_SUBST(OCAMLBEST)
+AC_SUBST(OCAMLVERSION)
+AC_SUBST(OCAMLLIB)
+AC_SUBST(OCAMLINSTALLLIB)
+AC_SUBST(OCAMLGRAPHLIB)
+AC_SUBST(MENHIR)
+
+AC_SUBST(enable_ocamlfind)
+AC_SUBST(OCAMLFIND)
+
+AC_SUBST(enable_statmemprof)
+AC_SUBST(STATMEMPROFPKG)
+
+AC_SUBST(enable_ide)
+AC_SUBST(LABLGTKPKG)
+AC_SUBST(GTKVERSION)
+
+AC_SUBST(enable_web_ide)
+AC_SUBST(enable_js_of_ocaml)
+AC_SUBST(JSOFOCAMLPKG)
+
+AC_SUBST(META_OCAMLGRAPH)
+
+AC_SUBST(enable_ppx)
+AC_SUBST(enable_sexp)
+AC_SUBST(SEXPLIB)
+AC_SUBST(SEXPLIBPPX)
+
+AC_SUBST(MLMPFR)
+AC_SUBST(enable_mpfr)
+AC_SUBST(old_mpfr)
+
+AC_SUBST(BIGINTINCLUDE)
+
+AC_SUBST(enable_infer)
+AC_SUBST(enable_bddinfer)
+AC_SUBST(INFERINCLUDE)
+AC_SUBST(INFERLIB)
+AC_SUBST(INFERPKG)
+
+AC_SUBST(enable_zip)
+AC_SUBST(ZIPINCLUDE)
+AC_SUBST(ZIPLIB)
+
+AC_SUBST(MENHIRINCLUDE)
+
+AC_SUBST(enable_re)
+AC_SUBST(REINCLUDE)
+AC_SUBST(RELIB)
+
+AC_SUBST(enable_coq_libs)
+AC_SUBST(enable_coq_fp_libs)
+AC_SUBST(coq_compat_version)
+
+AC_SUBST(COQC)
+AC_SUBST(COQDEP)
+AC_SUBST(COQLIB)
+AC_SUBST(COQVERSION)
+AC_SUBST(COQFLAGS)
+
+AC_SUBST(enable_pvs_libs)
+AC_SUBST(PVS)
+AC_SUBST(PVSVERSION)
+
+AC_SUBST(enable_isabelle_libs)
+AC_SUBST(ISABELLE)
+AC_SUBST(ISABELLEVERSION)
+
+AC_SUBST(enable_hypothesis_selection)
+AC_SUBST(enable_stackify)
+
+AC_SUBST(enable_doc)
+AC_SUBST(enable_pdf_doc)
+
+AC_SUBST(LATEX)
+AC_SUBST(SPHINX)
+
+AC_SUBST(enable_emacs_compilation)
+AC_SUBST(EMACS)
+
+AC_SUBST(enable_frama_c)
+
+AC_SUBST(FRAMAC)
+AC_SUBST(FRAMAC_VERSION)
+AC_SUBST(FRAMAC_SHARE)
+AC_SUBST(FRAMAC_LIBDIR)
+AC_SUBST(FRAMAC_INCLUDE)
+
+AC_SUBST(enable_local)
+AC_SUBST(LOCALDIR)
+
+AC_SUBST(enable_why3_lib)
+AC_SUBST(WHY3LIB)
+AC_SUBST(WHY3INCLUDE)
+
+AC_SUBST(enable_relocation)
+
+AC_SUBST(JAVAC)
+AC_SUBST(JAVA)
+
+# Finally create the Makefile from Makefile.in
+AC_CONFIG_FILES(Makefile)
+AC_CONFIG_FILES(src/config.sh)
+AC_CONFIG_FILES(lib/why3/META)
+AC_CONFIG_FILES(.merlin)
+AC_CONFIG_FILES(src/jessie/Makefile)
+AC_CONFIG_FILES(src/jessie/.merlin)
+AC_CONFIG_FILES(lib/coq/version lib/pvs/version)
+AC_CONFIG_FILES(bench/java/Makefile)
+AC_CONFIG_FILES(doc/javaexamples/Makefile)
+AC_CONFIG_COMMANDS([chmod],
+chmod a-w Makefile src/jessie/Makefile;
+chmod a-w src/config.sh;
+chmod a-w lib/why3/META;
+chmod a-w .merlin;
+chmod a-w src/jessie/Makefile;
+chmod a-w src/jessie/.merlin;
+chmod a-w lib/coq/version lib/pvs/version;
+chmod u+x src/config.sh)
+
+AC_OUTPUT
+
+
+# Summary
+
+echo
+echo "                 Summary"
+echo "-----------------------------------------"
+echo "Verbose make                : $enable_verbose_make"
+echo "OCaml compiler              : yes"
+echo "    Version                 : $OCAMLVERSION"
+echo "    Library path            : $OCAMLLIB"
+echo "    Ocamlfind               : $enable_ocamlfind$reason_ocamlfind"
+echo "    Native compilation      : $enable_native_code"
+echo "    Memory profiling        : $enable_statmemprof$reason_statmemprof"
+echo "    PPX                     : $enable_ppx$reason_ppx"
+echo "    S-expressions support   : $enable_sexp$reason_sexp"
+echo "    Javascript support      : $enable_js_of_ocaml$reason_js_of_ocaml"
+echo "    MPFR support            : $enable_mpfr$reason_mpfr"
+echo "    Re support              : $enable_re$reason_re"
+echo "Build environment"
+echo "    OCaml OS Type           : $OCAML_OS_TYPE"
+echo "    Build environment type  : $BUILD_ENV_TYPE"
+echo "Components"
+echo "    Why3 library            : $enable_why3_lib"
+echo "    GTK IDE                 : $enable_ide$reason_ide"
+echo "    Web IDE                 : $enable_web_ide$reason_web_ide"
+echo "    Compressed sessions     : $enable_zip$reason_zip"
+echo "    Hypothesis selection    : $enable_hypothesis_selection$reason_hypothesis_selection"
+echo "    Stackify                : $enable_stackify$reason_stackify"
+echo "    Invariant inference(exp): $enable_infer$reason_infer"
+echo "    Inference with BDDs(exp): $enable_bddinfer$reason_bddinfer"
+echo "    Frama-C support         : $enable_frama_c$reason_frama_c"
+if test "$enable_frama_c" = yes ; then
+   echo "        Version             : $FRAMAC_VERSION"
+   echo "        Share path          : $FRAMAC_SHARE"
+   echo "        Library path        : $FRAMAC_LIBDIR"
+fi
+echo "Documentation               : $enable_doc$reason_doc"
+if test "$enable_doc" = yes ; then
+   echo "    HTML                    : yes"
+   echo "    PDF                     : $enable_pdf_doc$reason_pdf_doc"
+fi
+echo "Support for interactive proof assistants"
+echo "    Coq                     : $enable_coq_support$reason_coq_support"
+if test "$enable_coq_support" = yes ; then
+   echo "        Version             : $COQVERSION"
+   echo "        Library path        : $COQLIB"
+   echo "        Realization support : $enable_coq_libs$reason_coq_libs"
+   if test "$enable_coq_libs" = yes ; then
+      echo "            FP arithmetic   : $enable_coq_fp_libs$reason_coq_fp_libs"
+   fi
+fi
+echo "    PVS                     : $enable_pvs_support$reason_pvs_support"
+if test "$enable_pvs_support" = yes ; then
+   echo "        Version             : $PVSVERSION"
+   echo "        Library path        : $PVSLIB"
+   echo "        Realization support : $enable_pvs_libs$reason_pvs_libs"
+fi
+echo "    Isabelle                : $enable_isabelle_support$reason_isabelle_support"
+if test "$enable_isabelle_support" = yes ; then
+   echo "        Version             : $ISABELLEVERSION ($ISABELLEDETECTEDVERSION)"
+   echo "        Realization support : $enable_isabelle_libs$reason_isabelle_libs"
+fi
+if test "$enable_local" = yes ; then
+   echo "Installable                 : no"
+   echo "    OCaml library path      : $OCAMLINSTALLLIB/why3"
+else
+   echo "Installable                 : yes"
+   echo "    Binary path             : $bindir"
+   echo "    Library path            : $libdir/why3"
+   echo "    Data path               : $datarootdir/why3"
+   echo "    OCaml library path      : $OCAMLINSTALLLIB/why3"
+   echo "    Relocatable             : $enable_relocation"
+fi

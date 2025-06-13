@@ -1,0 +1,20 @@
+#!/bin/sh
+
+cat <<EOF
+digraph G {
+  rankdir=RL;
+  nodesep=0.4
+  ranksep=0.6
+  node [shape=box,margin=0.05]
+EOF
+
+for file in "$@"; do
+  depends="$(sed -n -e 's/^import "\([^"]*\)"/\1/p' $file)"
+  for d in $depends; do
+    if test "$d" != "discrimination.gen" ; then
+      echo "  \"$(basename $file)\" -> \"$d\";"
+    fi
+  done
+done
+
+echo "}"

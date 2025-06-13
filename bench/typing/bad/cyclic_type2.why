@@ -1,0 +1,4 @@
+theory Test
+  type t = u
+  with u = t
+end

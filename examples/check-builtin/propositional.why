@@ -1,0 +1,8 @@
+theory Prop
+
+  predicate a
+  predicate b
+
+  goal G : a /\ b -> a
+
+end
