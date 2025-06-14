@@ -125,6 +125,23 @@ let print_goal fmt n =
 (* _____________________________________________________________________ *)
 (* -------------------- printing --------------------------------------- *)
 
+let json_char_escape = function
+  | '"'  -> "\\\""
+  | '\\' -> "\\\\"
+  | '\b' -> "\\b"
+  | '\n' -> "\\n"
+  | '\r' -> "\\r"
+  | '\t' -> "\\t"
+  | '\012' -> "\\f"
+  | '\032' .. '\126' as c -> String.make 1 c
+  | c -> Printf.sprintf "\\u%04x" (Char.code c)
+
+let json_string s =
+  let escaped_chars = String.to_seq s
+                     |> Seq.map json_char_escape
+                     |> List.of_seq in
+  "\"" ^ String.concat "" escaped_chars ^ "\""
+
 let get_result pa =
   match pa with
   | None -> None
@@ -132,14 +149,19 @@ let get_result pa =
     | Controller_itp.Done pr -> Some pr
     | _ -> None
 
+let xx_print_option f fmt = function
+  | None -> fprintf fmt "null"
+  | Some x -> f fmt x
+
 let print_proof_attempt fmt pa_id =
   let pa = Hnode.find nodes pa_id in
   match pa.node_proof with
-  | None -> pp_print_string fmt pa.node_name
+  | None -> 
+    fprintf fmt "%s: null" (json_string pa.node_name)
   | Some _pr ->
-    fprintf fmt "@[<h>%s %a@]"
-      pa.node_name
-      (Pp.print_option (Call_provers.print_prover_result ~json:false))
+    fprintf fmt "%s: %a"
+      (json_string pa.node_name)
+      (xx_print_option (Call_provers.print_prover_result ~json:true))
       (get_result pa.node_proof)
 
 let rec print_proof_node (fmt: formatter) goal_id =
@@ -149,24 +171,27 @@ let rec print_proof_node (fmt: formatter) goal_id =
   let current_goal =
     goal_id = !cur_id
   in
+  (*
   if current_goal then
     pp_print_string fmt "**";
   if goal.node_proved then
-    pp_print_string fmt "P";
+    pp_print_string fmt "P"; *)
   let proof_attempts, transformations =
     List.partition (fun n -> let node = Hnode.find nodes n in
       node.node_type = SProofAttempt) goal.children_nodes
   in
 
   fprintf fmt
-    "@[<hv 2>{ Goal=%s, id = %d;@ parent=%s;@ @[<hv 1>[%a]@]@ @[<hv 1>[%a]@] }@]"
-    goal.node_name goal_id parent_name
-    (Pp.print_list Pp.semi print_proof_attempt)
+    "{\"type\":\"Goal\", \"name\": %s, \"id\": %d, \"proved\": %s, \"attempts\":{%a}, \"sub\":[%a]}"
+    (json_string goal.node_name)
+    goal_id
+    (if goal.node_proved then "true" else "false")
+    (Pp.print_list Pp.comma print_proof_attempt)
     proof_attempts
-    (Pp.print_list Pp.semi print_trans_node) transformations;
+    (Pp.print_list Pp.comma print_trans_node) transformations;
 
-  if current_goal then
-    pp_print_string fmt " **"
+  (* if current_goal then
+    pp_print_string fmt " **" *)
 
 and print_trans_node fmt id =
   let trans = Hnode.find nodes id in
@@ -177,29 +202,34 @@ and print_trans_node fmt id =
   let parent_name = parent.node_name in
   if trans.node_proved then
     pp_print_string fmt "P";
-  fprintf fmt "@[<hv 2>{ Trans=%s;@ args=%a;@ parent=%s;@ [%a] }@]" name
-    (Pp.print_option (Pp.print_list Pp.semi pp_print_string)) args parent_name
-    (Pp.print_list Pp.semi print_proof_node) l
+  fprintf fmt "{\"type\":\"Trans\", \"name\": %s, \"args\": [%a], \"parent\": %s, \"sub\": [%a] }"
+    (json_string name)
+    (Pp.print_list Pp.comma pp_print_string)
+    (match args with None -> [] | Some l -> l)
+    (json_string parent_name)
+    (Pp.print_list Pp.comma print_proof_node) l
 
 let print_theory fmt th_id : unit =
   let th = Hnode.find nodes th_id in
   if th.node_proved then
     pp_print_string fmt "P";
-  fprintf fmt "@[<hv 1> Theory %s, id: %d;@ [%a]@]" th.node_name th_id
-    (Pp.print_list Pp.semi print_proof_node) th.children_nodes
+  fprintf fmt "{\"type\": \"Theory\", \"name\": %s, \"id\": %d, \"children\": [%a]}"
+    (json_string th.node_name) th_id
+    (Pp.print_list Pp.comma print_proof_node) th.children_nodes
 
 let print_file fmt file_ID =
   let file = Hnode.find nodes file_ID in
   assert (file.node_type = SFile);
-  fprintf fmt "@[<hv 1> File %s, id %d;@ [%a];@]" file.node_name file.node_ID
-    (Pp.print_list Pp.semi print_theory) file.children_nodes
+  fprintf fmt "{\"type\": \"File\", \"name\": %s, \"id\": %d, \"sub\": [%a]}"
+    (json_string file.node_name) file.node_ID
+    (Pp.print_list Pp.comma print_theory) file.children_nodes
 
 let print_s fmt files =
-  fprintf fmt "@[%a@]" (Pp.print_list Pp.semi print_file) files
+  fprintf fmt "%a" (Pp.print_list Pp.comma print_file) files
 
 let print_session fmt =
   let l = root_node.children_nodes in
-  fprintf fmt "root %a@." print_s l
+  fprintf fmt "OH!MY#GOD$I'M^GOING&TO*START@.%a@.OH!MY#GOD$I'HAVE!FINISHED@." print_s l
 
 
 let convert_to_shell_type t =

@@ -1208,6 +1208,8 @@ match pa.proof_state with
       let node_ID = node_ID_from_any x in
       let b = any_proved c.controller_session x in
       P.notify (Node_change (node_ID, Proved b));
+      P.notify (Message (Information (Printf.sprintf "\nOH!MY!GOD!NODE!%d!FINISHED!%s\n"
+                  node_ID (if b then "P" else "X"))));
       match x with
       | APa pa ->
          let pa = get_proof_attempt_node c.controller_session pa in
@@ -1380,7 +1382,7 @@ match pa.proof_state with
                    ~notification:(notify_change_proved d.cont)
                    ~removed)
                 unproven_goals
-    with
+    with 
       Not_found ->
       Debug.dprintf debug_strat "[strategy_exec] strategy '%s' not found@." s
 
