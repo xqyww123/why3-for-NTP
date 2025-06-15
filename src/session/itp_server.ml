@@ -1376,11 +1376,13 @@ match pa.proof_state with
       in
       let callback_pa = callback_update_tree_proof d.cont in
       let callback_tr tr args st = callback_update_tree_transform tr args st in
-      List.iter (fun id ->
+      List.iter (fun id -> begin
+                 Format.printf "OH!MY!GOD!BEGIN!PROOF!ATTEMPT!%d\n" (Obj.magic id : int);
                  C.run_strategy_on_goal d.cont id st
                    ~callback_pa ~callback_tr ~callback
                    ~notification:(notify_change_proved d.cont)
-                   ~removed)
+                   ~removed
+                end)
                 unproven_goals
     with 
       Not_found ->

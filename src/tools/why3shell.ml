@@ -213,7 +213,7 @@ let print_theory fmt th_id : unit =
   let th = Hnode.find nodes th_id in
   if th.node_proved then
     pp_print_string fmt "P";
-  fprintf fmt "{\"type\": \"Theory\", \"name\": %s, \"id\": %d, \"children\": [%a]}"
+  fprintf fmt "{\"type\": \"Theory\", \"name\": %s, \"id\": %d, \"sub\": [%a]}"
     (json_string th.node_name) th_id
     (Pp.print_list Pp.comma print_proof_node) th.children_nodes
 
@@ -309,7 +309,7 @@ let treat_message_notification fmt msg = match msg with
 
 let treat_notification fmt n =
   match n with
-  | Reset_whole_tree                        -> print_session fmt
+  | Reset_whole_tree                        -> ()
   | Node_change (id, info)                  ->
       change_node fmt id info
   | New_node (id, pid, typ, name, _detached) ->
@@ -368,7 +368,7 @@ let interp fmt cmd =
         let c = false (* TODO *) in
         let show_uses_clones_metas = false (* TODO *) in
         send_request (Get_task(!cur_id,c,show_uses_clones_metas,false));
-        print_session fmt
+        fprintf fmt "NICE!I!HAVE!DONE\n"
     | _ ->
         begin
           match cmd with
@@ -418,6 +418,8 @@ let config, env =
 let () =
   if Queue.is_empty files then
     Whyconf.Args.exit_with_usage usage_str;
+  (* Initialize parallel processing from configuration *)
+  Controller_itp.set_session_max_tasks (Whyconf.running_provers_max (Whyconf.get_main config));
   let fmt = if !quiet then str_formatter else std_formatter in
   fprintf fmt "Welcome to Why3 shell. Type 'help' for help.@.";
   let dir =

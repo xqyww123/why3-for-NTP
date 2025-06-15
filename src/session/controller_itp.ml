@@ -849,8 +849,11 @@ let call_one_prover c (p, timelimit, memlimit, steplimit) ~callback ~notificatio
   schedule_proof_attempt c g p ~limits ~callback ~notification
 
 let run_strategy_on_goal
-    c id strat ~callback_pa ~callback_tr ~callback ~notification ~removed =
-  let rec exec_strategy pc strat g =
+    c (id : proofNodeID) strat ~callback_pa ~callback_tr ~callback ~notification ~removed =
+  let rec exec_strategy pc strat g = begin
+    if pc >= Array.length strat then begin
+      Format.printf "\nOH!MY!GOD!NODE!%d!FINISHED!Q\n" (Obj.magic id : int)
+    end else () ;
     if pc < 0 || pc >= Array.length strat then
       callback STShalt
     else
@@ -918,6 +921,7 @@ let run_strategy_on_goal
       | Igoto pc ->
          callback (STSgoto (g,pc));
          exec_strategy pc strat g
+    end
   in
   exec_strategy 0 strat id
 
