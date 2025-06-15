@@ -50,8 +50,27 @@ let black_list =
 
 let isanitize = sanitizer' char_to_alpha char_to_alnumus char_to_alnum
 
+let char_to_html c = match c with
+  | '\"' -> "&quot;"
+  | '\'' -> "&#39;"
+  | '<' -> "&lt;"
+  | '>' -> "&gt;"
+  | '&' -> "&amp;"
+  | _ -> String.make 1 c
+
+let string_to_html s =
+  let b = Buffer.create (String.length s) in
+  String.iter (fun c -> Buffer.add_string b (char_to_html c)) s;
+  Buffer.contents b
+
+
+
+(* Dirty Hack, origin: 
+  let fresh_printer () =
+  create_ident_printer black_list ~sanitizer:isanitize 
+  *)
 let fresh_printer () =
-  create_ident_printer black_list ~sanitizer:isanitize
+  create_ident_printer black_list ~sanitizer:string_to_html
 
 let iprinter = fresh_printer ()
 
