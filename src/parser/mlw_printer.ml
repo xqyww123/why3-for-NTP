@@ -447,6 +447,7 @@ let remove_witness_existence pre =
   List.filter not_witness_existence pre
 
 let pp_let ~attr pp is_ref fmt (id, ghost, kind, x) =
+  if kind == Expr.RKlemma then () else
   match is_ref x with
   | Some (loc, x) when List.exists (function ATstr a -> a.Ident.attr_string = "mlw:reference_var" | _ -> false) id.id_ats ->
       fprintf fmt "@[<hv 2>let %aref %a%a =@ %a%a@]" pp_ghost ghost
@@ -582,6 +583,7 @@ let rec pp_fun ~attr pp fmt = function
 
 and pp_let_fun ~attr pp fmt
     (loc, id, ghost, kind, (binders, opt_pty, pat, mask, spec, x)) =
+  if kind == Expr.RKlemma then () else
   match binders, opt_pty, mask, pat with
   | [], None, Ity.MaskVisible, {pat_desc= Pwild; _} ->
       fprintf fmt "@[<hv>@[<v2>let %a%a%a%a = %a%abegin@ %a@ %a@]@ end@]"
@@ -596,6 +598,7 @@ and pp_let_fun ~attr pp fmt
         pp.marked x
 
 and pp_let_any ~attr fmt (loc, id, ghost, kind, (params, kind', opt_pty, pat, mask, spec)) =
+  if kind == Expr.RKlemma then () else
   if kind' <> Expr.RKnone then
     todo fmt "LET-ANY kind<>RKnone" (* Concrete syntax? *)
   else
@@ -613,6 +616,7 @@ and pp_let_any ~attr fmt (loc, id, ghost, kind, (params, kind', opt_pty, pat, ma
 
 and pp_fundef ~attr fmt
     (id, ghost, kind, binders, pty_opt, pat, mask, spec, e) =
+  if kind == Expr.RKlemma then () else
   fprintf fmt "%a%a%a%a%a%a =@ %a"
     pp_ghost ghost pp_kind kind
     (pp_id ~attr) id (pp_binders ~attr) binders
@@ -665,6 +669,8 @@ and pp_expr ~attr =
               (pp_let ~attr (pp_expr ~attr) is_ref_expr)
               (id, ghost, kind, e1) (pp_expr ~attr).marked e2)
     | Erec (defs, e) ->
+        let filtered_defs = List.filter (fun (_, _, kind, _, _, _, _, _, _) -> kind <> Expr.RKlemma) defs in
+        if filtered_defs = [] then () else
         let pp_fundefs =
           pp_print_list ~pp_sep:(pp_sep "@]@ @[<hv 2>with ") (pp_fundef ~attr)
         in
@@ -1167,6 +1173,7 @@ and pp_decl ?(attr=true) fmt = function
       in
       fprintf fmt "@[<hv 2>%s %a@]" keyword pp_ind_decls decls
   | Dprop (kind, id, t) ->
+      if kind == Decl.Plemma then () else
       let keyword = match kind with
         | Decl.Plemma -> "lemma"
         | Decl.Paxiom -> "axiom"
@@ -1187,6 +1194,8 @@ and pp_decl ?(attr=true) fmt = function
       | _ ->
           pp_let ~attr (pp_expr ~attr) is_ref_expr fmt (id, ghost, kind, e) )
   | Drec defs ->
+      let filtered_defs = List.filter (fun (_, _, kind, _, _, _, _, _, _) -> kind <> Expr.RKlemma) defs in
+      if filtered_defs = [] then () else
       let pp_fundefs =
         pp_print_list ~pp_sep:(pp_sep "@]@ @[<hv 2>with ")
           (pp_fundef ~attr) in
