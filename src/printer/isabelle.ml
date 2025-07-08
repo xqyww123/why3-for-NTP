@@ -125,6 +125,8 @@ let print_pr info fmt pr = print_id_attr info fmt pr.pr_name
 let print_id_real info fmt id =
   try
     let path, ipr = Mid.find id info.symbol_printers in
+    (* dirty hack: attribs "name" string (attrib "path" string) fmt (id_unique ipr id, path) *)
+    (* attribs "name" string (attrib "path" string) fmt (string_to_html id.id_string, path) *)
     attribs "name" string (attrib "path" string) fmt (id_unique ipr id, path)
   with Not_found ->
     attribs "name" print_id (attrib "local" string) fmt (id, "true")
@@ -341,11 +343,11 @@ let print_fun_eqn s info defs fmt (ls, ld) =
   let vl, t = dest_forall [] t0 in (
   match ls.ls_value with
   | None ->
-      elem s (print_altname_path info)
+      elem s (print_id_attr info)
              (pair (elem' "body" (print_term info defs))
                    (elems' "argtys" (print_ty info))) fmt (ls.ls_name, (t, ls.ls_args))
   | Some ty ->
-      elem s (print_altname_path info)
+      elem s (print_id_attr info)
              (pair (elem' "body" (print_term info defs))
              (pair (elems' "argtys" (print_ty info))
                    (elem' "retty" (print_ty info)))) fmt (ls.ls_name, (t, (ls.ls_args, ty))) ) ;
@@ -462,6 +464,11 @@ let print_task printer_args realize fmt task =
                Theory.Decl { Decl.d_node = Decl.Dprop (Decl.Pgoal, pr, _) }}} ->
         string_of_id pr.pr_name, realized_theories
     | Some { Task.task_decl = { Theory.td_node = Theory.Use th }} ->
+        Sid.iter (fun id -> ignore (id_unique iprinter id)) th.Theory.th_local;
+        let id = th.Theory.th_name in
+        String.concat "." (th.Theory.th_path @ [string_of_id id]),
+        realized_theories
+    | Some { Task.task_decl = { Theory.td_node = Theory.Clone (th, _) }} ->
         Sid.iter (fun id -> ignore (id_unique iprinter id)) th.Theory.th_local;
         let id = th.Theory.th_name in
         String.concat "." (th.Theory.th_path @ [string_of_id id]),
