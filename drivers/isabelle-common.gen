@@ -9,10 +9,10 @@ unknown "The following verification conditions remain to be proved" "incomplete 
 time "why3cpulimit time : %s s"
 
 transformation "eliminate_negative_constants"
-transformation "eliminate_literal"
-transformation "eliminate_if_fmla"
-transformation "eliminate_epsilon"
-transformation "eliminate_let_fmla"
+(* transformation "eliminate_literal" *)
+(* transformation "eliminate_if_fmla" *)
+(* transformation "eliminate_epsilon" *)
+(* transformation "eliminate_let_fmla" *)
 transformation "simplify_formula"
 
 theory BuiltIn

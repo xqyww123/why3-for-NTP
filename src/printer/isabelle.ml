@@ -209,6 +209,35 @@ let binop_name = function
   | Timplies -> "HOL.implies"
   | Tiff -> "HOL.eq"
 
+(* Character escape function for Isabelle XML output *)
+let isabelle_char_escape c = 
+  let code = Char.code c in
+  match c with
+  | '"' -> "&quot;"
+  | '&' -> "&amp;"
+  | '<' -> "&lt;"
+  | '>' -> "&gt;"
+  | '\'' -> "&#39;"
+  (* TAB, LF, CR are valid in XML *)
+  | '\t' | '\n' | '\r' -> String.make 1 c
+  (* Invalid XML characters: replace with Unicode replacement character *)
+  | c when code <= 0x08 || code = 0x0B || code = 0x0C || 
+           (code >= 0x0E && code <= 0x1F) ||
+           (code >= 0x7F && code <= 0x9F) ->
+      "&#xFFFD;" (* Unicode replacement character *)
+  (* Other control characters that need escaping as hex *)
+  | c when code >= 0x20 && code < 0x7F -> String.make 1 c
+  (* Handle other valid XML characters with hex encoding if needed *)
+  | c when code >= 0x80 -> Printf.sprintf "&#x%04X;" code
+  (* Valid XML characters normally *)
+  | c -> String.make 1 c
+
+(* String escape function for Isabelle XML output *)
+let isabelle_string_escape s =
+  let buf = Buffer.create (String.length s) in
+  String.iter (fun c -> Buffer.add_string buf (isabelle_char_escape c)) s;
+  Buffer.contents buf
+
 let number_format prty = {
     Number.long_int_support = `Custom (fun fmt n -> fprintf fmt "<num val=\"%s\">%t</num>" n prty);
     Number.negative_int_support = `Custom (fun fmt f -> fprintf fmt "<app><const name=\"Groups.uminus_class.uminus\"/>%t</app>" f);
@@ -234,8 +263,16 @@ let rec print_term info defs fmt t = match t.t_node with
   | Tvar v ->
       print_var info fmt v
   | Tconst c ->
-      Constant.(print (number_format (fun fmt -> print_ty info fmt (t_type t)))
-        unsupported_escape) fmt c
+      (match c with
+       | Constant.ConstStr s ->
+           (* Print string constants directly as XML strings *)
+           fprintf fmt "<string val=\"%s\">%t</string>" 
+             (isabelle_string_escape s)
+             (fun fmt -> print_ty info fmt (t_type t))
+       | _ ->
+           (* Handle other constants (numbers, etc.) *)
+           Constant.(print (number_format (fun fmt -> print_ty info fmt (t_type t)))
+             isabelle_char_escape) fmt c)
   | Tif (f, t1, t2) ->
       print_app print_const (print_term info defs) fmt ("HOL.If", [f; t1; t2])
   | Tlet (t1, tb) ->
