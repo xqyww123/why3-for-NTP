@@ -24,13 +24,13 @@ module Set
   use map.Map
   use map.Const
 
-  type set 'a = map 'a bool
+  type set 'a
 
   (** if `'a` is an infinite type, then `set 'a` is infinite *)
   meta "material_type_arg" type set, 0
 
   (** membership *)
-  predicate mem (x: 'a) (s: set 'a) = s[x]
+  predicate mem (x: 'a) (s: set 'a)
 
   use map.MapExt (* this imports extensionality for sets *)
 (*
@@ -55,7 +55,7 @@ module Set
   (** empty set *)
   predicate is_empty (s: set 'a) = forall x: 'a. not (mem x s)
 
-  let constant empty: set 'a = const false
+  constant empty: set 'a
 
   lemma is_empty_empty: is_empty (empty: set 'a)
 
@@ -63,10 +63,10 @@ module Set
     forall s: set 'a. is_empty s -> s = empty
 
   (** whole set *)
-  let constant all: set 'a = const true
+  constant all: set 'a
 
   (** addition *)
-  function add (x: 'a) (s: set 'a): set 'a = s[x <- true]
+  function add (x: 'a) (s: set 'a): set 'a
 
   function singleton (x: 'a): set 'a = add x empty
 
@@ -74,7 +74,7 @@ module Set
     forall x, y: 'a. mem y (singleton x) -> y = x
 
   (** removal *)
-  function remove (x: 'a) (s: set 'a): set 'a = s[x <- false]
+  function remove (x: 'a) (s: set 'a): set 'a
 
   lemma add_remove:
     forall x: 'a, s: set 'a. mem x s -> add x (remove x s) = s
@@ -87,7 +87,6 @@ module Set
 
   (** union *)
   function union (s1 s2: set 'a): set 'a
-  = fun x -> mem x s1 \/ mem x s2
 
   lemma subset_union_1:
     forall s1 s2: set 'a. subset s1 (union s1 s2)
@@ -96,7 +95,6 @@ module Set
 
   (** intersection *)
   function inter (s1 s2: set 'a): set 'a
-  = fun x -> mem x s1 /\ mem x s2
 
   lemma subset_inter_1:
     forall s1 s2: set 'a. subset (inter s1 s2) s1
@@ -105,14 +103,12 @@ module Set
 
   (** difference *)
   function diff (s1 s2: set 'a): set 'a
-  = fun x -> mem x s1 /\ not (mem x s2)
 
   lemma subset_diff:
     forall s1 s2: set 'a. subset (diff s1 s2) s1
 
   (** complement *)
   function complement (s: set 'a): set 'a
-  = fun x -> not (mem x s)
 
   (** arbitrary element *)
   function pick (s: set 'a): 'a
@@ -147,8 +143,7 @@ module Set
     forall s: set 'a, p: 'a -> bool. subset (filter s p) s
 
   (** `{ f x | x in U }` *)
-  function map (f: 'a -> 'b) (u: set 'a) : set 'b =
-    fun (y: 'b) -> exists x: 'a. mem x u /\ y = f x
+  function map (f: 'a -> 'b) (u: set 'a) : set 'b
 
   lemma mem_map:
     forall f: 'a -> 'b, u: set 'a.
