@@ -228,7 +228,7 @@ let isabelle_char_escape c =
   (* Other control characters that need escaping as hex *)
   | c when code >= 0x20 && code < 0x7F -> String.make 1 c
   (* Handle other valid XML characters with hex encoding if needed *)
-  | c when code < 0x20 -> Printf.sprintf "\\%02X;" code
+  | c when code < 0x20 -> Printf.sprintf "&#xFF%02X;" code
   | c when code >= 0x80 -> Printf.sprintf "&#x%04X;" code
   (* Valid XML characters normally *)
   | c -> String.make 1 c
