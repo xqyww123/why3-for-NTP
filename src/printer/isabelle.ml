@@ -46,7 +46,7 @@ let opt_string_of_bool b = if b then Some "true" else None
 (* identifiers *)
 
 let black_list =
-  ["o"; "O"]
+  ["o"; "O"; "choose"; "stacks"; "from"; "all"; "def"; "matches"; "prefix"; "id"; "extends"; "left"; "right"]
 
 let isanitize = sanitizer' char_to_alpha char_to_alnumus char_to_alnum
 
@@ -221,13 +221,14 @@ let isabelle_char_escape c =
   (* TAB, LF, CR are valid in XML *)
   | '\t' | '\n' | '\r' -> String.make 1 c
   (* Invalid XML characters: replace with Unicode replacement character *)
-  | c when code <= 0x08 || code = 0x0B || code = 0x0C || 
+  (* | c when code <= 0x08 || code = 0x0B || code = 0x0C || 
            (code >= 0x0E && code <= 0x1F) ||
            (code >= 0x7F && code <= 0x9F) ->
-      "&#xFFFD;" (* Unicode replacement character *)
+      "&#xFFFD;" (* Unicode replacement character *) *)
   (* Other control characters that need escaping as hex *)
   | c when code >= 0x20 && code < 0x7F -> String.make 1 c
   (* Handle other valid XML characters with hex encoding if needed *)
+  | c when code < 0x20 -> Printf.sprintf "\\%02X;" code
   | c when code >= 0x80 -> Printf.sprintf "&#x%04X;" code
   (* Valid XML characters normally *)
   | c -> String.make 1 c
